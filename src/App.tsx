@@ -12,25 +12,30 @@ import {
   borderHue,
   focusState,
   smoothAngle,
-  stepRedness,
+  START_FOCUS,
+  stepFocus,
   type Angle,
+  type Focus,
 } from "./tracking/focusState";
 
 type Status = "loading" | "camera-blocked" | "tracking-unavailable" | "ready";
+type Calibration = { step: "idle" } | { step: "countdown"; left: number } | { step: "sampling" } | { step: "failed" };
 
-const CALIBRATION_SECONDS = 1.5;
+const COUNTDOWN_SECONDS = 3;
+const SAMPLING_SECONDS = 1.5;
+const MIN_SAMPLES = 10;
 
 export default function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [status, setStatus] = useState<Status>("loading");
   const [reading, setReading] = useState<Reading | null>(null);
   const [safeAngle, setSafeAngle] = useState<Angle | null>(null);
-  const [calibrating, setCalibrating] = useState(false);
-  const [redness, setRedness] = useState(0);
+  const [calibration, setCalibration] = useState<Calibration>({ step: "idle" });
+  const [focus, setFocus] = useState<Focus>(START_FOCUS);
 
   const safeRef = useRef<Angle | null>(null);
   const smoothRef = useRef<Angle | null>(null);
-  const rednessRef = useRef(0);
+  const focusRef = useRef<Focus>(START_FOCUS);
   const lastFrameRef = useRef(0);
   const samplesRef = useRef<Angle[] | null>(null);
 
@@ -51,8 +56,8 @@ export default function App() {
       if (samplesRef.current && r.faceVisible) samplesRef.current.push({ yaw: r.yaw, pitch: r.pitch });
 
       if (safeRef.current) {
-        rednessRef.current = stepRedness(rednessRef.current, r, safeRef.current, seconds);
-        setRedness(rednessRef.current);
+        focusRef.current = stepFocus(focusRef.current, r, safeRef.current, seconds);
+        setFocus(focusRef.current);
       }
     };
 
@@ -78,22 +83,35 @@ export default function App() {
   }, []);
 
   const calibrate = () => {
-    samplesRef.current = [];
-    setCalibrating(true);
-    setTimeout(() => {
-      const samples = samplesRef.current ?? [];
-      samplesRef.current = null;
-      setCalibrating(false);
-      if (samples.length === 0) return;
-      const safe = averageAngle(samples);
-      safeRef.current = safe;
-      rednessRef.current = 0;
-      setSafeAngle(safe);
-      setRedness(0);
-    }, CALIBRATION_SECONDS * 1000);
+    let left = COUNTDOWN_SECONDS;
+    setCalibration({ step: "countdown", left });
+    const timer = setInterval(() => {
+      left -= 1;
+      if (left > 0) {
+        setCalibration({ step: "countdown", left });
+        return;
+      }
+      clearInterval(timer);
+      samplesRef.current = [];
+      setCalibration({ step: "sampling" });
+      setTimeout(() => {
+        const samples = samplesRef.current ?? [];
+        samplesRef.current = null;
+        if (samples.length < MIN_SAMPLES) {
+          setCalibration({ step: "failed" });
+          return;
+        }
+        const safe = averageAngle(samples);
+        safeRef.current = safe;
+        focusRef.current = START_FOCUS;
+        setSafeAngle(safe);
+        setFocus(START_FOCUS);
+        setCalibration({ step: "idle" });
+      }, SAMPLING_SECONDS * 1000);
+    }, 1000);
   };
 
-  const hue = borderHue(redness);
+  const hue = borderHue(focus.redness);
 
   return (
     <div className="session">
@@ -121,19 +139,25 @@ export default function App() {
               <div>
                 Safe: {safeAngle.yaw.toFixed(1)}° / {safeAngle.pitch.toFixed(1)}°
               </div>
-              <div>State: {focusState(redness, reading)}</div>
-              <div>Red: {Math.round(redness * 100)}%</div>
+              <div>State: {focusState(focus)}</div>
+              <div>Red: {Math.round(focus.redness * 100)}%</div>
             </>
           )}
         </div>
       )}
       {status === "ready" && (
         <div className="calibrate-bar">
-          {calibrating ? (
-            <span>Keep looking at your laptop, phone, or notebook…</span>
-          ) : (
-            <button onClick={calibrate} disabled={!reading?.faceVisible}>
-              {safeAngle ? "Recalibrate" : "Look at your work, then press to calibrate"}
+          {calibration.step === "countdown" && (
+            <span>Look at your laptop, phone, or notebook now… {calibration.left}</span>
+          )}
+          {calibration.step === "sampling" && <span>Hold still, keep looking…</span>}
+          {(calibration.step === "idle" || calibration.step === "failed") && (
+            <button onClick={calibrate}>
+              {calibration.step === "failed"
+                ? "Couldn't see your face while calibrating. Tilt a little less and try again"
+                : safeAngle
+                  ? "Recalibrate"
+                  : "Press to calibrate, then look at your work"}
             </button>
           )}
         </div>

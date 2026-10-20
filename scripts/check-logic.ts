@@ -1,4 +1,4 @@
-import { stepRedness, focusState } from "../src/tracking/focusState.ts";
+import { focusState, START_FOCUS, stepFocus, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
 
 const safe = { yaw: 0, pitch: -10 };
 const onWork = { faceVisible: true, yaw: 3, pitch: -8 };
@@ -12,39 +12,43 @@ function check(name: string, ok: boolean, detail = "") {
   if (!ok) failures++;
 }
 
-function run(start: number, reading: typeof onWork, seconds: number) {
-  let r = start;
-  for (let t = 0; t < seconds; t += FRAME) r = stepRedness(r, reading, safe, FRAME);
-  return r;
+function run(start: Focus, reading: FocusReading, seconds: number) {
+  let f = start;
+  for (let t = 0; t < seconds; t += FRAME) f = stepFocus(f, reading, safe, FRAME);
+  return f;
 }
 
-function secondsUntilRed(reading: typeof onWork) {
-  let r = 0;
+function secondsUntilRed(reading: FocusReading) {
+  let f = START_FOCUS;
   let t = 0;
-  while (r < 1 && t < 60) {
-    r = stepRedness(r, reading, safe, FRAME);
+  while (f.redness < 1 && t < 60) {
+    f = stepFocus(f, reading, safe, FRAME);
     t += FRAME;
   }
   return t;
 }
 
-check("on the work stays green", run(0, onWork, 10) === 0);
-check("on the work state", focusState(0, onWork) === "on-work");
+check("on the work stays green", run(START_FOCUS, onWork, 10).redness === 0);
+check("on the work state", focusState(START_FOCUS) === "on-work");
 
-const afterTwoSeconds = run(0, lookingAway, 2);
-check("looking away turns red slowly, not instantly", afterTwoSeconds > 0 && afterTwoSeconds < 1, afterTwoSeconds.toFixed(2));
-check("looking away is drifting before full red", focusState(afterTwoSeconds, lookingAway) === "drifting");
+const away = run(START_FOCUS, lookingAway, 2);
+check("looking away turns red slowly, not instantly", away.redness > 0 && away.redness < 1, away.redness.toFixed(2));
+check("looking away is drifting before full red", focusState(away) === "drifting");
 
-const back = run(afterTwoSeconds, onWork, 1);
-check("looking back turns green again", back < afterTwoSeconds, `${afterTwoSeconds.toFixed(2)} -> ${back.toFixed(2)}`);
-check("coming back in time reaches full green", run(afterTwoSeconds, onWork, 5) === 0);
+const back = run(away, onWork, 0.3);
+check("looking back turns green again", back.redness < away.redness, `${away.redness.toFixed(2)} -> ${back.redness.toFixed(2)}`);
+check("coming back in time reaches full green", run(away, onWork, 5).redness === 0);
 
 const awayTime = secondsUntilRed(lookingAway);
 const chairTime = secondsUntilRed(leftChair);
-check("sustained looking away reaches full red", run(0, lookingAway, 10) === 1, `${awayTime.toFixed(1)}s`);
-check("full red is left-work", focusState(1, lookingAway) === "left-work");
+check("sustained looking away reaches full red", run(START_FOCUS, lookingAway, 10).redness === 1, `${awayTime.toFixed(1)}s`);
+check("full red is left-work", focusState({ redness: 1, missingSeconds: 0 }) === "left-work");
 check("leaving the chair turns red faster", chairTime < awayTime, `${chairTime.toFixed(1)}s vs ${awayTime.toFixed(1)}s`);
-check("missing face is left-chair", focusState(0.5, leftChair) === "left-chair");
+
+const blip = run(START_FOCUS, leftChair, 1);
+check("a short face blip does not count as leaving the chair", blip.redness === 0 && focusState(blip) === "on-work");
+check("face missing past the grace is left-chair", focusState(run(START_FOCUS, leftChair, 2)) === "left-chair");
+check("face coming back resets the grace", run(blip, onWork, FRAME).missingSeconds === 0);
 
 if (failures) throw new Error(`${failures} check(s) failed`);
 console.log("\nAll checks passed");

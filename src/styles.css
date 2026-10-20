@@ -250,6 +250,32 @@ button {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.session-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.session-list button {
+  width: 100%;
+  padding: 0.55rem 0;
+  border: none;
+  border-bottom: 1px solid #26262f;
+  background: none;
+  color: #e6e6ee;
+  text-align: left;
+}
+
+.session-list li:last-child button {
+  border-bottom: none;
+}
+
+.session-list button:hover {
+  color: #14f07a;
+}
+
 /* Meme storage and bonk */
 .meme-grid {
   display: grid;

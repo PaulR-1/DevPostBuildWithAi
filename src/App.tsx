@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { memeById, SAMPLE_MEMES } from "./memes";
 import Calibration from "./screens/Calibration";
 import Home from "./screens/Home";
@@ -10,6 +10,7 @@ import { elapsedMs, endClock, pauseClock, resumeClock, sessionLengthMs, startClo
 import type { Reading } from "./tracking/faceTracking";
 import { START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
 import { useTracking } from "./tracking/useTracking";
+import { addSession, getSetting, setSetting, type PastSession } from "./storage/focusDb";
 
 type Phase = "home" | "calibrating" | "starting" | "running" | "paused" | "ending" | "results";
 
@@ -20,7 +21,18 @@ export default function App() {
   const [phase, setPhase] = useState<Phase>("home");
   const [focus, setFocus] = useState<Focus>(START_FOCUS);
   const [stats, setStats] = useState<SessionStats | null>(null);
+  /** True when the results on screen are a past session, already saved. */
+  const [viewingPast, setViewingPast] = useState(false);
   const [chosenMemeId, setChosenMemeId] = useState(SAMPLE_MEMES[0].id);
+
+  useEffect(() => {
+    getSetting<string>("chosenMemeId").then((id) => id && setChosenMemeId(id));
+  }, []);
+
+  const chooseMeme = (id: string) => {
+    setChosenMemeId(id);
+    setSetting("chosenMemeId", id);
+  };
 
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
@@ -39,6 +51,7 @@ export default function App() {
 
   const onCalibrated = useCallback((safe: Angle) => {
     safeRef.current = safe;
+    setSetting("calibration", safe);
     focusRef.current = START_FOCUS;
     setFocus(START_FOCUS);
     setPhase("starting");
@@ -68,17 +81,40 @@ export default function App() {
       elapsedMs: elapsedMs(clock, now),
       distractions: focusRef.current.distractions,
     });
+    setViewingPast(false);
     setPhase("ending");
   };
 
   const onEnded = useCallback(() => setPhase("results"), []);
+
+  const finish = async () => {
+    if (!viewingPast && stats) {
+      try {
+        await addSession({ ...stats, finishedAt: Date.now() });
+      } catch {
+        // Storage can fail (e.g. private mode); still return home rather than trap the learner on results.
+      }
+    }
+    setPhase("home");
+  };
+
+  const openPastSession = (session: PastSession) => {
+    setStats(session);
+    setViewingPast(true);
+    setPhase("results");
+  };
 
   return (
     <div className="app">
       {cameraOn && <video ref={videoRef} className="camera" playsInline muted />}
 
       {phase === "home" && (
-        <Home onStart={() => setPhase("calibrating")} chosenMemeId={chosenMemeId} onChooseMeme={setChosenMemeId} />
+        <Home
+          onStart={() => setPhase("calibrating")}
+          chosenMemeId={chosenMemeId}
+          onChooseMeme={chooseMeme}
+          onOpenSession={openPastSession}
+        />
       )}
       {phase === "calibrating" && (
         <Calibration status={status} reading={reading} onCalibrated={onCalibrated} onCancel={() => setPhase("home")} />
@@ -89,7 +125,7 @@ export default function App() {
       )}
       {phase === "paused" && <Pause />}
       {phase === "ending" && <TitleCard text="Session End" ending onDone={onEnded} />}
-      {phase === "results" && stats && <Results stats={stats} onFinish={() => setPhase("home")} />}
+      {phase === "results" && stats && <Results stats={stats} onFinish={finish} />}
     </div>
   );
 }

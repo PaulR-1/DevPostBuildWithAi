@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { memeById, SAMPLE_MEMES } from "./memes";
 import Calibration from "./screens/Calibration";
 import Home from "./screens/Home";
 import Pause from "./screens/Pause";
@@ -19,13 +20,13 @@ export default function App() {
   const [phase, setPhase] = useState<Phase>("home");
   const [focus, setFocus] = useState<Focus>(START_FOCUS);
   const [stats, setStats] = useState<SessionStats | null>(null);
+  const [chosenMemeId, setChosenMemeId] = useState(SAMPLE_MEMES[0].id);
 
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
   const safeRef = useRef<Angle | null>(null);
   const focusRef = useRef<Focus>(START_FOCUS);
   const clockRef = useRef<Clock | null>(null);
-  const distractionsRef = useRef(0);
 
   const onReading = useCallback((reading: Reading, seconds: number) => {
     if (phaseRef.current !== "running" || !safeRef.current) return;
@@ -39,7 +40,6 @@ export default function App() {
   const onCalibrated = useCallback((safe: Angle) => {
     safeRef.current = safe;
     focusRef.current = START_FOCUS;
-    distractionsRef.current = 0;
     setFocus(START_FOCUS);
     setPhase("starting");
   }, []);
@@ -66,7 +66,7 @@ export default function App() {
     setStats({
       sessionLengthMs: sessionLengthMs(clock, now),
       elapsedMs: elapsedMs(clock, now),
-      distractions: distractionsRef.current,
+      distractions: focusRef.current.distractions,
     });
     setPhase("ending");
   };
@@ -77,13 +77,15 @@ export default function App() {
     <div className="app">
       {cameraOn && <video ref={videoRef} className="camera" playsInline muted />}
 
-      {phase === "home" && <Home onStart={() => setPhase("calibrating")} />}
+      {phase === "home" && (
+        <Home onStart={() => setPhase("calibrating")} chosenMemeId={chosenMemeId} onChooseMeme={setChosenMemeId} />
+      )}
       {phase === "calibrating" && (
         <Calibration status={status} reading={reading} onCalibrated={onCalibrated} onCancel={() => setPhase("home")} />
       )}
       {phase === "starting" && <TitleCard text="Session Start!" onDone={onStarted} />}
       {(phase === "running" || phase === "paused") && (
-        <Session focus={focus} paused={phase === "paused"} onPause={pause} onPlay={play} onStop={stop} />
+        <Session focus={focus} meme={memeById(chosenMemeId)} paused={phase === "paused"} onPause={pause} onPlay={play} onStop={stop} />
       )}
       {phase === "paused" && <Pause />}
       {phase === "ending" && <TitleCard text="Session End" ending onDone={onEnded} />}

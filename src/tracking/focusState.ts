@@ -11,6 +11,9 @@ export type Focus = {
   missingSeconds: number;
   /** Face missing but body still in the chair. */
   faceHidden: boolean;
+  /** The meme already bonked for this look-away; cleared once the border is fully green again. */
+  bonked: boolean;
+  distractions: number;
 };
 
 export const FOCUS_SETTINGS = {
@@ -30,7 +33,7 @@ export const FOCUS_SETTINGS = {
   smoothing: 0.25,
 };
 
-export const START_FOCUS: Focus = { redness: 0, missingSeconds: 0, faceHidden: false };
+export const START_FOCUS: Focus = { redness: 0, missingSeconds: 0, faceHidden: false, bonked: false, distractions: 0 };
 
 export function averageAngle(angles: Angle[]): Angle {
   const n = angles.length || 1;
@@ -66,7 +69,20 @@ export function stepFocus(focus: Focus, reading: FocusReading, safe: Angle, seco
   } else if (!isOnAngle(reading, safe)) rate = 1 / FOCUS_SETTINGS.secondsToRedLookingAway;
   else rate = -1 / FOCUS_SETTINGS.secondsToGreen;
 
-  return { redness: Math.min(1, Math.max(0, focus.redness + rate * seconds)), missingSeconds, faceHidden };
+  const redness = Math.min(1, Math.max(0, focus.redness + rate * seconds));
+  const bonkNow = redness >= 1 && !focus.bonked;
+  return {
+    redness,
+    missingSeconds,
+    faceHidden,
+    bonked: bonkNow || (focus.bonked && redness > 0),
+    distractions: focus.distractions + (bonkNow ? 1 : 0),
+  };
+}
+
+/** The chosen meme shows while the border is fully red. */
+export function showMeme(focus: Focus): boolean {
+  return focus.redness >= 1;
 }
 
 export function focusState(focus: Focus): FocusState {

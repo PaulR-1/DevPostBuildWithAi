@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#ffd23f"/>
+  <g transform="rotate(-25 200 170)">
+    <rect x="185" y="150" width="30" height="170" rx="10" fill="#8b5a2b"/>
+    <rect x="110" y="70" width="180" height="100" rx="30" fill="#b5763c" stroke="#5c3a1a" stroke-width="8"/>
+  </g>
+  <g fill="none" stroke="#ff3b3b" stroke-width="10" stroke-linecap="round">
+    <path d="M60 250 l40 20"/><path d="M50 300 l45 0"/><path d="M70 345 l35 -20"/>
+  </g>
+  <text x="200" y="370" font-family="Impact, Arial Black, sans-serif" font-size="90" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="6" paint-order="stroke">BONK</text>
+</svg>

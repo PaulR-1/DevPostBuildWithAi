@@ -1,5 +1,5 @@
 import { elapsedMs, endClock, formatDuration, pauseClock, resumeClock, sessionLengthMs, startClock } from "../src/sessionClock.ts";
-import { focusState, START_FOCUS, stepFocus, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
+import { focusState, showMeme, START_FOCUS, stepFocus, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
 
 const safe = { yaw: 0, pitch: -10 };
 const onWork = { faceVisible: true, bodyVisible: true, yaw: 3, pitch: -8 };
@@ -56,6 +56,16 @@ const covered = run(START_FOCUS, handOverFace, 10);
 check("hand over face with body in chair does not turn red", covered.redness === 0 && focusState(covered) === "face-hidden");
 const coveredWhileDrifting = run(away, handOverFace, 5);
 check("hand over face holds the border where it was", coveredWhileDrifting.redness === away.redness);
+
+check("drifting does not count a distraction", away.distractions === 0);
+const bonk = run(START_FOCUS, lookingAway, 20);
+check("one sustained look-away counts exactly one distraction", bonk.distractions === 1 && showMeme(bonk), `${bonk.distractions}`);
+const halfBack = run(run(bonk, onWork, 1), lookingAway, 10);
+check("looking back only part way then away again does not count twice", halfBack.distractions === 1);
+const second = run(run(bonk, onWork, 5), lookingAway, 10);
+check("coming back fully then looking away again counts a second", second.distractions === 2, `${second.distractions}`);
+check("meme hides once you look back", !showMeme(run(bonk, onWork, 0.1)));
+check("leaving the chair counts as a distraction too", run(START_FOCUS, leftChair, 10).distractions === 1);
 
 let clock = startClock(0);
 clock = pauseClock(clock, 60_000);

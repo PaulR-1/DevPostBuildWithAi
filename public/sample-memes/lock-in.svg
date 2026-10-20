@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#1b1b2f"/>
+  <path d="M140 170 v-40 a60 60 0 0 1 120 0 v40" fill="none" stroke="#c7c7d1" stroke-width="22"/>
+  <rect x="110" y="165" width="180" height="140" rx="20" fill="#14f07a"/>
+  <circle cx="200" cy="225" r="18" fill="#04170c"/>
+  <rect x="192" y="230" width="16" height="40" rx="6" fill="#04170c"/>
+  <text x="200" y="70" font-family="Impact, Arial Black, sans-serif" font-size="56" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">BRO.</text>
+  <text x="200" y="370" font-family="Impact, Arial Black, sans-serif" font-size="70" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="6" paint-order="stroke">LOCK IN.</text>
+</svg>

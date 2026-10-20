@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { borderHue, type Focus } from "../tracking/focusState";
+import type { Meme } from "../memes";
+import { borderHue, showMeme, type Focus } from "../tracking/focusState";
 
 export default function Session({
   focus,
+  meme,
   paused,
   onPause,
   onPlay,
   onStop,
 }: {
   focus: Focus;
+  meme: Meme;
   paused: boolean;
   onPause: () => void;
   onPlay: () => void;
@@ -20,6 +23,11 @@ export default function Session({
   return (
     <>
       <div className="focus-border" style={{ boxShadow: `inset 0 0 90px 35px hsla(${hue}, 90%, 50%, 0.6)` }} />
+      {showMeme(focus) && !paused && (
+        <div className="meme-bonk">
+          <img src={meme.src} alt={meme.name} />
+        </div>
+      )}
       <div className="bubble">
         <button className="bubble-icon" onClick={() => setMenuOpen((open) => !open)} aria-label="Session controls">
           <img src="/app-icon.svg" alt="" />

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#7b2ff7"/>
+  <path d="M120 230 c-40 0 -50 -60 -15 -75 c-5 -45 50 -60 70 -35 c20 -30 75 -25 80 10 c40 -5 60 50 25 70 c15 35 -30 60 -55 40 c-25 25 -85 15 -105 -10z" fill="#ff8fb1" stroke="#a83c62" stroke-width="8"/>
+  <path d="M170 160 q20 20 0 40 M230 150 q-15 30 10 50" fill="none" stroke="#a83c62" stroke-width="6"/>
+  <g fill="#9be15d"><circle cx="150" cy="275" r="10"/><circle cx="240" cy="285" r="14"/><circle cx="200" cy="300" r="8"/></g>
+  <text x="200" y="70" font-family="Impact, Arial Black, sans-serif" font-size="50" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">YOUR BRAIN</text>
+  <text x="200" y="370" font-family="Impact, Arial Black, sans-serif" font-size="44" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">ON DOOMSCROLL</text>
+</svg>

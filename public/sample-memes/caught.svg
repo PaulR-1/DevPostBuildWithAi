@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#ff3b3b"/>
+  <ellipse cx="130" cy="190" rx="70" ry="50" fill="#fff"/>
+  <ellipse cx="270" cy="190" rx="70" ry="50" fill="#fff"/>
+  <circle cx="150" cy="195" r="26" fill="#111"/>
+  <circle cx="290" cy="195" r="26" fill="#111"/>
+  <circle cx="158" cy="186" r="8" fill="#fff"/>
+  <circle cx="298" cy="186" r="8" fill="#fff"/>
+  <text x="200" y="80" font-family="Impact, Arial Black, sans-serif" font-size="54" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">I SAW THAT.</text>
+  <text x="200" y="350" font-family="Impact, Arial Black, sans-serif" font-size="40" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="5" paint-order="stroke">BACK TO THE NOTES</text>
+</svg>

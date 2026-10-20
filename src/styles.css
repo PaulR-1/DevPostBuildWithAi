@@ -250,6 +250,61 @@ button {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* Meme storage and bonk */
+.meme-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.meme-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #0d0d12;
+  color: #c7c7d1;
+  font-size: 0.8rem;
+}
+
+.meme-choice img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+}
+
+.meme-choice--chosen {
+  border-color: #14f07a;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(20, 240, 122, 0.4);
+}
+
+.meme-bonk {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.meme-bonk img {
+  width: min(60vmin, 480px);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  animation: bonk 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+@keyframes bonk {
+  0% { transform: scale(0.2) rotate(-25deg); opacity: 0; }
+  60% { transform: scale(1.12) rotate(6deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-3deg); }
+}
+
 /* Results */
 .results {
   height: 100%;

@@ -65,6 +65,8 @@ You do not look back. The border finishes turning red. The meme you chose before
 
 You leave your chair. The border turns red faster than it does for a look away.
 
+You cover your face, for example with your hand, but you are still in your chair. That is not leaving the chair. The border stays where it is until FocusRot can see your eyes again. You chose this at the first build checkpoint, for clarity.
+
 Noted before removal, as you asked: slumping is out. No slouch detection, no "bad sitting" check, and no other function about how you sit while still in the chair. `scope.md > The Unique Kernel` watches posture. For this proof, posture means whether you have left the chair.
 
 ### Session controls

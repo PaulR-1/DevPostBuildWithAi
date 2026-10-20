@@ -37,6 +37,7 @@ PRD ref: `prd.md > The Core Journey`.
 - **TypeScript** — checks the code before it runs. You chose it with React. The tradeoff is more errors to read while learning. Documentation: https://www.typescriptlang.org/
 - **Vite** — starts the React page in Chrome. This follows from React. Documentation: https://vite.dev/
 - **MediaPipe Face Landmarker** — finds the face and eyes in the browser. You chose it. The tradeoff is a larger first download. Documentation: https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker/web_js
+- **MediaPipe Pose Landmarker (lite)** — finds your shoulders when your face can't be seen, so a hand over your face is not mistaken for leaving the chair. You chose it at the slice 2 checkpoint for clarity. The tradeoff is a second download and a little more code. It only runs while the face is missing. Documentation: https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js
 - **IndexedDB** — stores photos, memes, calibration, and session history in Chrome on this laptop. You chose it. The tradeoff is more code than a small text note. Documentation: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
 
 ## Where It Runs and How Someone Tries It
@@ -86,7 +87,7 @@ PRD ref: `prd.md > Leaving the work`.
 
 ### Camera and Face Tracking
 
-Starts the webcam and asks MediaPipe for face and eye points on the laptop.
+Starts the webcam and asks MediaPipe for face and eye points on the laptop. When no face is found, it asks the pose model whether your shoulders are still in view.
 
 PRD ref: `prd.md > Calibration`, `prd.md > Leaving the chair`.
 
@@ -98,7 +99,7 @@ PRD ref: `prd.md > Calibration`.
 
 ### Focus State
 
-Compares the live eye angle with the safe angle. A visible face inside the safe angle is on the work. Eyes off that angle mean drifting or left the work. No visible face means left the chair.
+Compares the live eye angle with the safe angle. A visible face inside the safe angle is on the work. Eyes off that angle mean drifting or left the work. No visible face and no visible body means left the chair. A hidden face with your body still in view holds the border where it is.
 
 PRD ref: `prd.md > On-work border`, `prd.md > Leaving the work`, `prd.md > Leaving the chair`.
 
@@ -171,7 +172,7 @@ project/
 ## Important Failure Modes
 
 - **Camera blocked or face missing before start** → show the note to unblock the camera and show your face. Wait to show "Session Start!" Implements `prd.md > States and Boundaries`.
-- **Face disappears during a session** → treat it as leaving the chair. The border turns red faster. Implements `prd.md > Leaving the chair`.
+- **Face disappears during a session** → if your body is also gone for more than a short blip, treat it as leaving the chair and turn the border red faster. If your body is still there, the face is just hidden (for example a hand over it), and the border holds. Implements `prd.md > Leaving the chair`.
 - **MediaPipe cannot load** → say face tracking is unavailable. Do not run a session that pretends to see you.
 
 ## What Was Simplified and Why

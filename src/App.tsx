@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CameraBlockedError,
-  loadFaceLandmarker,
+  loadTrackers,
   startCamera,
   stopCamera,
   trackFrames,
@@ -50,7 +50,7 @@ export default function App() {
       lastFrameRef.current = now;
 
       if (raw.faceVisible) smoothRef.current = smoothAngle(smoothRef.current, raw);
-      const r: Reading = raw.faceVisible ? { faceVisible: true, ...smoothRef.current! } : raw;
+      const r: Reading = raw.faceVisible ? { ...raw, ...smoothRef.current! } : raw;
       setReading(r);
 
       if (samplesRef.current && r.faceVisible) samplesRef.current.push({ yaw: r.yaw, pitch: r.pitch });
@@ -65,10 +65,10 @@ export default function App() {
       const video = videoRef.current!;
       try {
         stream = await startCamera(video);
-        const landmarker = await loadFaceLandmarker();
+        const trackers = await loadTrackers();
         if (cancelled) return;
         setStatus("ready");
-        stopTracking = trackFrames(video, landmarker, onReading);
+        stopTracking = trackFrames(video, trackers, onReading);
       } catch (err) {
         if (cancelled) return;
         setStatus(err instanceof CameraBlockedError ? "camera-blocked" : "tracking-unavailable");
@@ -132,6 +132,7 @@ export default function App() {
       {status === "ready" && reading && (
         <div className="readout">
           <div>Face: {reading.faceVisible ? "visible" : "not visible"}</div>
+          <div>Body: {reading.bodyVisible ? "in chair" : "not visible"}</div>
           <div>Left/right: {reading.yaw.toFixed(1)}°</div>
           <div>Up/down: {reading.pitch.toFixed(1)}°</div>
           {safeAngle && (

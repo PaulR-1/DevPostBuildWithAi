@@ -1,14 +1,16 @@
 export type Angle = { yaw: number; pitch: number };
 
-export type FocusReading = Angle & { faceVisible: boolean };
+export type FocusReading = Angle & { faceVisible: boolean; bodyVisible: boolean };
 
-export type FocusState = "on-work" | "drifting" | "left-work" | "left-chair";
+export type FocusState = "on-work" | "drifting" | "left-work" | "face-hidden" | "left-chair";
 
 export type Focus = {
   /** 0 = fully green, 1 = fully red. */
   redness: number;
-  /** How long the face has been missing without a break. */
+  /** How long the face and body have both been missing without a break. */
   missingSeconds: number;
+  /** Face missing but body still in the chair. */
+  faceHidden: boolean;
 };
 
 export const FOCUS_SETTINGS = {
@@ -22,13 +24,13 @@ export const FOCUS_SETTINGS = {
   secondsToRedLeftChair: 3.5,
   /** Seconds of looking back to go from fully red to fully green. */
   secondsToGreen: 3,
-  /** A face missing for less than this is a tracking blip, not leaving the chair. */
+  /** Face and body missing for less than this is a tracking blip, not leaving the chair. */
   leftChairGraceSeconds: 1.5,
   /** How much each new frame moves the smoothed angle (0 to 1). */
   smoothing: 0.25,
 };
 
-export const START_FOCUS: Focus = { redness: 0, missingSeconds: 0 };
+export const START_FOCUS: Focus = { redness: 0, missingSeconds: 0, faceHidden: false };
 
 export function averageAngle(angles: Angle[]): Angle {
   const n = angles.length || 1;
@@ -53,18 +55,24 @@ export function isOnAngle(angle: Angle, safe: Angle): boolean {
 
 /** Moves the focus forward by one frame lasting `seconds`. */
 export function stepFocus(focus: Focus, reading: FocusReading, safe: Angle, seconds: number): Focus {
-  const missingSeconds = reading.faceVisible ? 0 : focus.missingSeconds + seconds;
+  const faceHidden = !reading.faceVisible && reading.bodyVisible;
+  const gone = !reading.faceVisible && !reading.bodyVisible;
+  const missingSeconds = gone ? focus.missingSeconds + seconds : 0;
+
   let rate: number;
-  if (!reading.faceVisible) {
+  if (faceHidden) rate = 0;
+  else if (gone) {
     rate = missingSeconds < FOCUS_SETTINGS.leftChairGraceSeconds ? 0 : 1 / FOCUS_SETTINGS.secondsToRedLeftChair;
   } else if (!isOnAngle(reading, safe)) rate = 1 / FOCUS_SETTINGS.secondsToRedLookingAway;
   else rate = -1 / FOCUS_SETTINGS.secondsToGreen;
-  return { redness: Math.min(1, Math.max(0, focus.redness + rate * seconds)), missingSeconds };
+
+  return { redness: Math.min(1, Math.max(0, focus.redness + rate * seconds)), missingSeconds, faceHidden };
 }
 
 export function focusState(focus: Focus): FocusState {
   if (focus.redness >= 1) return "left-work";
   if (focus.missingSeconds >= FOCUS_SETTINGS.leftChairGraceSeconds) return "left-chair";
+  if (focus.faceHidden) return "face-hidden";
   return focus.redness > 0 ? "drifting" : "on-work";
 }
 

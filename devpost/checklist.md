@@ -9,7 +9,7 @@ Build mode: fast
 
 ## Slices
 
-- [ ] **1. You see yourself on camera, and FocusRot can tell where your eyes point**
+- [x] **1. You see yourself on camera, and FocusRot can tell where your eyes point**
   Becomes usable: A page in Chrome that shows your camera. A small readout says whether your face is visible and shows your live eye angle. If the camera is blocked, you see the note to unblock the camera and show your face. If MediaPipe cannot load, the page says face tracking is unavailable.
   Why now: MediaPipe and the camera are the biggest unknowns. If eye angle cannot be read, nothing else matters. Project setup happens inside this step.
   PRD ref: `prd.md > The Core Journey` (step 5), `prd.md > States and Boundaries` (camera blocked or face not visible)
@@ -19,7 +19,7 @@ Build mode: fast
   Learner check: Run `npm run dev`, open the address in Chrome, and allow the camera. You should see yourself. Look at your laptop, then look away, then cover the camera or move out of frame. Say whether the readout changes when you do each one.
   Commit: `Show camera feed with live face and eye-angle tracking`
 
-- [ ] **2. You calibrate, and the border turns from green to red when you look away**
+- [x] **2. You calibrate, and the border turns from green to red when you look away**
   Becomes usable: You press a calibrate button while looking at your laptop, phone, or notebook. A soft green haze sits around the screen. Look away and it slowly turns red. Look back in time and it slowly turns green. Leave the frame and it turns red faster.
   Why now: This is the unique kernel — the visible catch. It needs to be tried on your real camera early so we can tune how sensitive it is before adding more screens.
   PRD ref: `prd.md > Features and Behavior > Calibration`, `prd.md > On-work border`, `prd.md > Leaving the work`, `prd.md > Leaving the chair`, `prd.md > States and Boundaries`
@@ -91,4 +91,10 @@ Reflection: [offered/answered/declined/already covered — personal answer belon
 Activity mode: [live app and editor, explicit static fallback, focused alternative, prior practice, or recap]
 
 ## Revisions
+
+- Left/right gaze now comes from the iris position inside the eye plus a reduced head-turn weight, measured in the camera image; up/down uses nose-to-chin position plus eye blendshapes — at the slice 2 checkpoint, head tilt dominated and looking back at the screen with a turned head still counted as away, and head and eye up/down could cancel out.
+- Face-missing gets a 1.5-second grace before "left the chair", and MediaPipe confidence was lowered to 0.3 — the learner saw "left the chair" while still seated, and when tilting toward the notebook or partly covering the face.
+- Calibration starts with a 3-second countdown and reports when it couldn't see the face — pressing the on-screen button meant calibrating on the screen, not the notebook, and a failed calibration was silent.
+- Added MediaPipe Pose Landmarker (lite), run only when no face is found: body still in view means the face is hidden and the border holds; body gone means left the chair — the learner saw a hand over the face counted as leaving the chair, and chose a second model for clarity after hearing the cost. Spec Stack, Camera and Face Tracking, Focus State, and Failure Modes, plus PRD Leaving the chair, were updated.
+- Red speeds slowed to 8 seconds (looking away) and 5 seconds total (left chair, including the grace) — learner asked for "a tad bit longer".
 

@@ -1,9 +1,16 @@
-import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import { FaceLandmarker, FilesetResolver, PoseLandmarker } from "@mediapipe/tasks-vision";
 import type { Classifications } from "@mediapipe/tasks-vision";
 
 const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm";
-const MODEL_URL =
+const FACE_MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
+const POSE_MODEL_URL =
+  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+
+// Pose landmark numbers (from MediaPipe's pose map).
+const LEFT_SHOULDER = 11;
+const RIGHT_SHOULDER = 12;
+const MIN_SHOULDER_VISIBILITY = 0.5;
 
 // How many degrees the iris moving from the centre to the corner of the eye is worth.
 const EYE_YAW_GAIN = 170;
@@ -26,6 +33,8 @@ const LEFT_EYE = { left: 362, right: 263, iris: 473 };
 
 export type Reading = {
   faceVisible: boolean;
+  /** Shoulders in view. Only checked when the face is missing; true whenever the face is visible. */
+  bodyVisible: boolean;
   /** Left/right gaze in degrees: head turn plus eye movement. */
   yaw: number;
   /** Up/down gaze in degrees: head tilt plus eye movement. */
@@ -54,27 +63,43 @@ export function stopCamera(stream: MediaStream | null) {
   stream?.getTracks().forEach((t) => t.stop());
 }
 
-let landmarkerPromise: Promise<FaceLandmarker> | null = null;
+export type Trackers = { face: FaceLandmarker; pose: PoseLandmarker };
 
-export function loadFaceLandmarker(): Promise<FaceLandmarker> {
-  landmarkerPromise ??= (async () => {
+let trackersPromise: Promise<Trackers> | null = null;
+
+export function loadTrackers(): Promise<Trackers> {
+  trackersPromise ??= (async () => {
     try {
       const fileset = await FilesetResolver.forVisionTasks(WASM_URL);
-      return await FaceLandmarker.createFromOptions(fileset, {
-        baseOptions: { modelAssetPath: MODEL_URL, delegate: "GPU" },
-        runningMode: "VIDEO",
-        numFaces: 1,
-        minFaceDetectionConfidence: MIN_CONFIDENCE,
-        minFacePresenceConfidence: MIN_CONFIDENCE,
-        minTrackingConfidence: MIN_CONFIDENCE,
-        outputFaceBlendshapes: true,
-      });
+      const [face, pose] = await Promise.all([
+        FaceLandmarker.createFromOptions(fileset, {
+          baseOptions: { modelAssetPath: FACE_MODEL_URL, delegate: "GPU" },
+          runningMode: "VIDEO",
+          numFaces: 1,
+          minFaceDetectionConfidence: MIN_CONFIDENCE,
+          minFacePresenceConfidence: MIN_CONFIDENCE,
+          minTrackingConfidence: MIN_CONFIDENCE,
+          outputFaceBlendshapes: true,
+        }),
+        PoseLandmarker.createFromOptions(fileset, {
+          baseOptions: { modelAssetPath: POSE_MODEL_URL, delegate: "GPU" },
+          runningMode: "VIDEO",
+          numPoses: 1,
+        }),
+      ]);
+      return { face, pose };
     } catch (err) {
-      landmarkerPromise = null;
+      trackersPromise = null;
       throw new TrackingUnavailableError(String(err));
     }
   })();
-  return landmarkerPromise;
+  return trackersPromise;
+}
+
+function bodyVisible(pose: PoseLandmarker, video: HTMLVideoElement): boolean {
+  const body = pose.detectForVideo(video, performance.now()).landmarks?.[0];
+  if (!body) return false;
+  return [LEFT_SHOULDER, RIGHT_SHOULDER].some((i) => (body[i]?.visibility ?? 0) >= MIN_SHOULDER_VISIBILITY);
 }
 
 function score(shapes: Classifications, name: string): number {
@@ -87,7 +112,7 @@ const clamp = (v: number) => Math.max(-1, Math.min(1, v));
 /** Runs face tracking on every video frame. Returns a function that stops it. */
 export function trackFrames(
   video: HTMLVideoElement,
-  landmarker: FaceLandmarker,
+  trackers: Trackers,
   onReading: (reading: Reading) => void,
 ): () => void {
   let frameId = 0;
@@ -98,11 +123,11 @@ export function trackFrames(
     if (video.readyState < 2 || video.currentTime === lastTime) return;
     lastTime = video.currentTime;
 
-    const result = landmarker.detectForVideo(video, performance.now());
+    const result = trackers.face.detectForVideo(video, performance.now());
     const points = result.faceLandmarks?.[0];
     const shapes = result.faceBlendshapes?.[0];
     if (!points || points.length < 478 || !shapes) {
-      onReading({ faceVisible: false, yaw: 0, pitch: 0 });
+      onReading({ faceVisible: false, bodyVisible: bodyVisible(trackers.pose, video), yaw: 0, pitch: 0 });
       return;
     }
 
@@ -131,6 +156,7 @@ export function trackFrames(
 
     onReading({
       faceVisible: true,
+      bodyVisible: true,
       yaw: headYaw * HEAD_WEIGHT + eyeYaw,
       pitch: headPitch * HEAD_WEIGHT + eyeUp * EYE_PITCH_RANGE,
     });

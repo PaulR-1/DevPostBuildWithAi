@@ -1,3 +1,4 @@
+import { elapsedMs, endClock, formatDuration, pauseClock, resumeClock, sessionLengthMs, startClock } from "../src/sessionClock.ts";
 import { focusState, START_FOCUS, stepFocus, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
 
 const safe = { yaw: 0, pitch: -10 };
@@ -55,6 +56,18 @@ const covered = run(START_FOCUS, handOverFace, 10);
 check("hand over face with body in chair does not turn red", covered.redness === 0 && focusState(covered) === "face-hidden");
 const coveredWhileDrifting = run(away, handOverFace, 5);
 check("hand over face holds the border where it was", coveredWhileDrifting.redness === away.redness);
+
+let clock = startClock(0);
+clock = pauseClock(clock, 60_000);
+check("paused clock stops session length", sessionLengthMs(clock, 90_000) === 60_000);
+clock = resumeClock(clock, 100_000);
+clock = endClock(clock, 160_000);
+const length = sessionLengthMs(clock, 999_999);
+const elapsed = elapsedMs(clock, 999_999);
+check("session length leaves out paused time", length === 120_000, formatDuration(length));
+check("elapsed time includes paused time", elapsed === 160_000, formatDuration(elapsed));
+check("difference is exactly the paused time", elapsed - length === 40_000);
+check("stopping while paused still leaves out the pause", sessionLengthMs(endClock(pauseClock(startClock(0), 10_000), 25_000), 0) === 10_000);
 
 if (failures) throw new Error(`${failures} check(s) failed`);
 console.log("\nAll checks passed");

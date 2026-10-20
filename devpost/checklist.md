@@ -71,7 +71,7 @@ Build mode: fast
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 2, try the border on your real camera and tune sensitivity
+- [x] Early usable behavior explored — after slice 2, try the border on your real camera and tune sensitivity
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
@@ -96,5 +96,7 @@ Activity mode: [live app and editor, explicit static fallback, focused alternati
 - Face-missing gets a 1.5-second grace before "left the chair", and MediaPipe confidence was lowered to 0.3 — the learner saw "left the chair" while still seated, and when tilting toward the notebook or partly covering the face.
 - Calibration starts with a 3-second countdown and reports when it couldn't see the face — pressing the on-screen button meant calibrating on the screen, not the notebook, and a failed calibration was silent.
 - Added MediaPipe Pose Landmarker (lite), run only when no face is found: body still in view means the face is hidden and the border holds; body gone means left the chair — the learner saw a hand over the face counted as leaving the chair, and chose a second model for clarity after hearing the cost. Spec Stack, Camera and Face Tracking, Focus State, and Failure Modes, plus PRD Leaving the chair, were updated.
+- Tracking runs on a ~30-per-second timer instead of animation frames — in slice 3 testing, Chrome slowed animation frames to about one per second when the window wasn't on screen, which starved calibration; a covered or hidden window during real study would do the same.
+- Added `src/tracking/useTracking.ts` (camera and tracking hook shared by calibration and session), `src/sessionClock.ts` (session length and elapsed time), and `src/screens/TitleCard.tsx` (shared "Session Start!" / "Session End" title) alongside the spec's file structure — calibration and session both need the same camera, and the three title screens share one style.
 - Red speeds slowed to 8 seconds (looking away) and 5 seconds total (left chair, including the grace) — learner asked for "a tad bit longer".
 

@@ -1,168 +1,93 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  CameraBlockedError,
-  loadTrackers,
-  startCamera,
-  stopCamera,
-  trackFrames,
-  type Reading,
-} from "./tracking/faceTracking";
-import {
-  averageAngle,
-  borderHue,
-  focusState,
-  smoothAngle,
-  START_FOCUS,
-  stepFocus,
-  type Angle,
-  type Focus,
-} from "./tracking/focusState";
+import { useCallback, useRef, useState } from "react";
+import Calibration from "./screens/Calibration";
+import Home from "./screens/Home";
+import Pause from "./screens/Pause";
+import Results, { type SessionStats } from "./screens/Results";
+import Session from "./screens/Session";
+import TitleCard from "./screens/TitleCard";
+import { elapsedMs, endClock, pauseClock, resumeClock, sessionLengthMs, startClock, type Clock } from "./sessionClock";
+import type { Reading } from "./tracking/faceTracking";
+import { START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
+import { useTracking } from "./tracking/useTracking";
 
-type Status = "loading" | "camera-blocked" | "tracking-unavailable" | "ready";
-type Calibration = { step: "idle" } | { step: "countdown"; left: number } | { step: "sampling" } | { step: "failed" };
+type Phase = "home" | "calibrating" | "starting" | "running" | "paused" | "ending" | "results";
 
-const COUNTDOWN_SECONDS = 3;
-const SAMPLING_SECONDS = 1.5;
-const MIN_SAMPLES = 10;
+const CAMERA_PHASES: Phase[] = ["calibrating", "starting", "running", "paused", "ending"];
 
 export default function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [status, setStatus] = useState<Status>("loading");
-  const [reading, setReading] = useState<Reading | null>(null);
-  const [safeAngle, setSafeAngle] = useState<Angle | null>(null);
-  const [calibration, setCalibration] = useState<Calibration>({ step: "idle" });
+  const [phase, setPhase] = useState<Phase>("home");
   const [focus, setFocus] = useState<Focus>(START_FOCUS);
+  const [stats, setStats] = useState<SessionStats | null>(null);
 
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
   const safeRef = useRef<Angle | null>(null);
-  const smoothRef = useRef<Angle | null>(null);
   const focusRef = useRef<Focus>(START_FOCUS);
-  const lastFrameRef = useRef(0);
-  const samplesRef = useRef<Angle[] | null>(null);
+  const clockRef = useRef<Clock | null>(null);
+  const distractionsRef = useRef(0);
 
-  useEffect(() => {
-    let cancelled = false;
-    let stream: MediaStream | null = null;
-    let stopTracking = () => {};
-
-    const onReading = (raw: Reading) => {
-      const now = performance.now();
-      const seconds = lastFrameRef.current ? Math.min(0.2, (now - lastFrameRef.current) / 1000) : 0;
-      lastFrameRef.current = now;
-
-      if (raw.faceVisible) smoothRef.current = smoothAngle(smoothRef.current, raw);
-      const r: Reading = raw.faceVisible ? { ...raw, ...smoothRef.current! } : raw;
-      setReading(r);
-
-      if (samplesRef.current && r.faceVisible) samplesRef.current.push({ yaw: r.yaw, pitch: r.pitch });
-
-      if (safeRef.current) {
-        focusRef.current = stepFocus(focusRef.current, r, safeRef.current, seconds);
-        setFocus(focusRef.current);
-      }
-    };
-
-    (async () => {
-      const video = videoRef.current!;
-      try {
-        stream = await startCamera(video);
-        const trackers = await loadTrackers();
-        if (cancelled) return;
-        setStatus("ready");
-        stopTracking = trackFrames(video, trackers, onReading);
-      } catch (err) {
-        if (cancelled) return;
-        setStatus(err instanceof CameraBlockedError ? "camera-blocked" : "tracking-unavailable");
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      stopTracking();
-      stopCamera(stream);
-    };
+  const onReading = useCallback((reading: Reading, seconds: number) => {
+    if (phaseRef.current !== "running" || !safeRef.current) return;
+    focusRef.current = stepFocus(focusRef.current, reading, safeRef.current, seconds);
+    setFocus(focusRef.current);
   }, []);
 
-  const calibrate = () => {
-    let left = COUNTDOWN_SECONDS;
-    setCalibration({ step: "countdown", left });
-    const timer = setInterval(() => {
-      left -= 1;
-      if (left > 0) {
-        setCalibration({ step: "countdown", left });
-        return;
-      }
-      clearInterval(timer);
-      samplesRef.current = [];
-      setCalibration({ step: "sampling" });
-      setTimeout(() => {
-        const samples = samplesRef.current ?? [];
-        samplesRef.current = null;
-        if (samples.length < MIN_SAMPLES) {
-          setCalibration({ step: "failed" });
-          return;
-        }
-        const safe = averageAngle(samples);
-        safeRef.current = safe;
-        focusRef.current = START_FOCUS;
-        setSafeAngle(safe);
-        setFocus(START_FOCUS);
-        setCalibration({ step: "idle" });
-      }, SAMPLING_SECONDS * 1000);
-    }, 1000);
+  const cameraOn = CAMERA_PHASES.includes(phase);
+  const { status, reading } = useTracking(videoRef, cameraOn, onReading);
+
+  const onCalibrated = useCallback((safe: Angle) => {
+    safeRef.current = safe;
+    focusRef.current = START_FOCUS;
+    distractionsRef.current = 0;
+    setFocus(START_FOCUS);
+    setPhase("starting");
+  }, []);
+
+  const onStarted = useCallback(() => {
+    clockRef.current = startClock(Date.now());
+    setPhase("running");
+  }, []);
+
+  const pause = () => {
+    clockRef.current = pauseClock(clockRef.current!, Date.now());
+    setPhase("paused");
   };
 
-  const hue = borderHue(focus.redness);
+  const play = () => {
+    clockRef.current = resumeClock(clockRef.current!, Date.now());
+    setPhase("running");
+  };
+
+  const stop = () => {
+    const now = Date.now();
+    const clock = endClock(clockRef.current!, now);
+    clockRef.current = clock;
+    setStats({
+      sessionLengthMs: sessionLengthMs(clock, now),
+      elapsedMs: elapsedMs(clock, now),
+      distractions: distractionsRef.current,
+    });
+    setPhase("ending");
+  };
+
+  const onEnded = useCallback(() => setPhase("results"), []);
 
   return (
-    <div className="session">
-      <video ref={videoRef} className="camera" playsInline muted />
-      {safeAngle && (
-        <div
-          className="focus-border"
-          style={{ boxShadow: `inset 0 0 90px 35px hsla(${hue}, 90%, 50%, 0.6)` }}
-        />
+    <div className="app">
+      {cameraOn && <video ref={videoRef} className="camera" playsInline muted />}
+
+      {phase === "home" && <Home onStart={() => setPhase("calibrating")} />}
+      {phase === "calibrating" && (
+        <Calibration status={status} reading={reading} onCalibrated={onCalibrated} onCancel={() => setPhase("home")} />
       )}
-      {status === "loading" && <div className="notice">Loading face tracking…</div>}
-      {status === "camera-blocked" && (
-        <div className="notice">Unblock the camera and show your face.</div>
+      {phase === "starting" && <TitleCard text="Session Start!" onDone={onStarted} />}
+      {(phase === "running" || phase === "paused") && (
+        <Session focus={focus} paused={phase === "paused"} onPause={pause} onPlay={play} onStop={stop} />
       )}
-      {status === "tracking-unavailable" && (
-        <div className="notice">Face tracking is unavailable. Check your internet and reload.</div>
-      )}
-      {status === "ready" && reading && (
-        <div className="readout">
-          <div>Face: {reading.faceVisible ? "visible" : "not visible"}</div>
-          <div>Body: {reading.bodyVisible ? "in chair" : "not visible"}</div>
-          <div>Left/right: {reading.yaw.toFixed(1)}°</div>
-          <div>Up/down: {reading.pitch.toFixed(1)}°</div>
-          {safeAngle && (
-            <>
-              <div>
-                Safe: {safeAngle.yaw.toFixed(1)}° / {safeAngle.pitch.toFixed(1)}°
-              </div>
-              <div>State: {focusState(focus)}</div>
-              <div>Red: {Math.round(focus.redness * 100)}%</div>
-            </>
-          )}
-        </div>
-      )}
-      {status === "ready" && (
-        <div className="calibrate-bar">
-          {calibration.step === "countdown" && (
-            <span>Look at your laptop, phone, or notebook now… {calibration.left}</span>
-          )}
-          {calibration.step === "sampling" && <span>Hold still, keep looking…</span>}
-          {(calibration.step === "idle" || calibration.step === "failed") && (
-            <button onClick={calibrate}>
-              {calibration.step === "failed"
-                ? "Couldn't see your face while calibrating. Tilt a little less and try again"
-                : safeAngle
-                  ? "Recalibrate"
-                  : "Press to calibrate, then look at your work"}
-            </button>
-          )}
-        </div>
-      )}
+      {phase === "paused" && <Pause />}
+      {phase === "ending" && <TitleCard text="Session End" ending onDone={onEnded} />}
+      {phase === "results" && stats && <Results stats={stats} onFinish={() => setPhase("home")} />}
     </div>
   );
 }

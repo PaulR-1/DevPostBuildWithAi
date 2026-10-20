@@ -11,6 +11,7 @@ const POSE_MODEL_URL =
 const LEFT_SHOULDER = 11;
 const RIGHT_SHOULDER = 12;
 const MIN_SHOULDER_VISIBILITY = 0.5;
+const FRAME_INTERVAL_MS = 33;
 
 // How many degrees the iris moving from the centre to the corner of the eye is worth.
 const EYE_YAW_GAIN = 170;
@@ -115,11 +116,13 @@ export function trackFrames(
   trackers: Trackers,
   onReading: (reading: Reading) => void,
 ): () => void {
-  let frameId = 0;
+  let timerId = 0;
   let lastTime = -1;
 
+  // A timer, not animation frames: Chrome nearly stops animation frames when the
+  // window is covered or the tab is hidden, and tracking must keep running then.
   const tick = () => {
-    frameId = requestAnimationFrame(tick);
+    timerId = window.setTimeout(tick, FRAME_INTERVAL_MS);
     if (video.readyState < 2 || video.currentTime === lastTime) return;
     lastTime = video.currentTime;
 
@@ -163,5 +166,5 @@ export function trackFrames(
   };
 
   tick();
-  return () => cancelAnimationFrame(frameId);
+  return () => clearTimeout(timerId);
 }

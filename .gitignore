@@ -2,6 +2,9 @@
 # This does not keep it out of your AI provider's conversation.
 /devpost/learner-profile.md
 
+node_modules/
+dist/
+
 # Local credentials
 .env
 .env.*

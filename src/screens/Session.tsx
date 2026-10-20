@@ -9,6 +9,7 @@ export default function Session({
   onPause,
   onPlay,
   onStop,
+  onOpenSettings,
 }: {
   focus: Focus;
   meme: Meme;
@@ -16,6 +17,7 @@ export default function Session({
   onPause: () => void;
   onPlay: () => void;
   onStop: () => void;
+  onOpenSettings: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const hue = borderHue(focus.redness);
@@ -40,6 +42,14 @@ export default function Session({
               <button onClick={onPause}>❚❚ Pause</button>
             )}
             <button onClick={onStop}>■ Stop</button>
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                onOpenSettings();
+              }}
+            >
+              ⚙ Settings
+            </button>
           </div>
         )}
       </div>

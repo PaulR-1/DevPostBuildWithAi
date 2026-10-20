@@ -12,16 +12,21 @@ type Step = { name: "idle" } | { name: "countdown"; left: number } | { name: "sa
 export default function Calibration({
   status,
   reading,
+  savedAngle,
   onCalibrated,
   onCancel,
 }: {
   status: TrackingStatus;
   reading: Reading | null;
+  /** When set, offers to skip calibrating and reuse this angle. */
+  savedAngle?: Angle | null;
   onCalibrated: (safe: Angle) => void;
   onCancel: () => void;
 }) {
   const [step, setStep] = useState<Step>({ name: "idle" });
   const samples = useRef<Angle[] | null>(null);
+  const onCalibratedRef = useRef(onCalibrated);
+  onCalibratedRef.current = onCalibrated;
 
   useEffect(() => {
     if (samples.current && reading?.faceVisible) samples.current.push({ yaw: reading.yaw, pitch: reading.pitch });
@@ -43,11 +48,11 @@ export default function Calibration({
         const got = samples.current ?? [];
         samples.current = null;
         if (got.length < MIN_SAMPLES) setStep({ name: "failed" });
-        else onCalibrated(averageAngle(got));
+        else onCalibratedRef.current(averageAngle(got));
       }, SAMPLING_SECONDS * 1000);
       return () => clearTimeout(timer);
     }
-  }, [step, onCalibrated]);
+  }, [step]);
 
   const faceMissing = status === "ready" && reading !== null && !reading.faceVisible && step.name === "idle";
 
@@ -73,6 +78,11 @@ export default function Calibration({
           {canCalibrate && (
             <button className="pill-button pill-button--primary" onClick={() => setStep({ name: "countdown", left: COUNTDOWN_SECONDS })}>
               Calibrate
+            </button>
+          )}
+          {canCalibrate && savedAngle && (
+            <button className="pill-button" onClick={() => onCalibrated(savedAngle)}>
+              Use saved angle
             </button>
           )}
         </div>

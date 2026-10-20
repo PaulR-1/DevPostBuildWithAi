@@ -5,28 +5,56 @@ import Home from "./screens/Home";
 import Pause from "./screens/Pause";
 import Results, { type SessionStats } from "./screens/Results";
 import Session from "./screens/Session";
+import Settings from "./screens/Settings";
 import TitleCard from "./screens/TitleCard";
 import { elapsedMs, endClock, pauseClock, resumeClock, sessionLengthMs, startClock, type Clock } from "./sessionClock";
+import { addSession, getSetting, setSetting, type PastSession } from "./storage/focusDb";
 import type { Reading } from "./tracking/faceTracking";
 import { START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
 import { useTracking } from "./tracking/useTracking";
-import { addSession, getSetting, setSetting, type PastSession } from "./storage/focusDb";
 
-type Phase = "home" | "calibrating" | "starting" | "running" | "paused" | "ending" | "results";
+type Phase =
+  | "home"
+  | "calibrating"
+  | "recalibrating-home"
+  | "starting"
+  | "running"
+  | "recalibrating-session"
+  | "paused"
+  | "ending"
+  | "results";
 
-const CAMERA_PHASES: Phase[] = ["calibrating", "starting", "running", "paused", "ending"];
+const CAMERA_PHASES: Phase[] = [
+  "calibrating",
+  "recalibrating-home",
+  "starting",
+  "running",
+  "recalibrating-session",
+  "paused",
+  "ending",
+];
 
 export default function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [phase, setPhase] = useState<Phase>("home");
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [focus, setFocus] = useState<Focus>(START_FOCUS);
   const [stats, setStats] = useState<SessionStats | null>(null);
   /** True when the results on screen are a past session, already saved. */
   const [viewingPast, setViewingPast] = useState(false);
   const [chosenMemeId, setChosenMemeId] = useState(SAMPLE_MEMES[0].id);
+  const [savedAngle, setSavedAngle] = useState<Angle | null>(null);
+
+  const trackingFocus = phase === "running" && !settingsOpen;
+  const trackingFocusRef = useRef(trackingFocus);
+  trackingFocusRef.current = trackingFocus;
+  const safeRef = useRef<Angle | null>(null);
+  const focusRef = useRef<Focus>(START_FOCUS);
+  const clockRef = useRef<Clock | null>(null);
 
   useEffect(() => {
     getSetting<string>("chosenMemeId").then((id) => id && setChosenMemeId(id));
+    getSetting<Angle>("calibration").then((a) => a && setSavedAngle(a));
   }, []);
 
   const chooseMeme = (id: string) => {
@@ -34,14 +62,8 @@ export default function App() {
     setSetting("chosenMemeId", id);
   };
 
-  const phaseRef = useRef(phase);
-  phaseRef.current = phase;
-  const safeRef = useRef<Angle | null>(null);
-  const focusRef = useRef<Focus>(START_FOCUS);
-  const clockRef = useRef<Clock | null>(null);
-
   const onReading = useCallback((reading: Reading, seconds: number) => {
-    if (phaseRef.current !== "running" || !safeRef.current) return;
+    if (!trackingFocusRef.current || !safeRef.current) return;
     focusRef.current = stepFocus(focusRef.current, reading, safeRef.current, seconds);
     setFocus(focusRef.current);
   }, []);
@@ -49,13 +71,35 @@ export default function App() {
   const cameraOn = CAMERA_PHASES.includes(phase);
   const { status, reading } = useTracking(videoRef, cameraOn, onReading);
 
-  const onCalibrated = useCallback((safe: Angle) => {
+  const saveAngle = (safe: Angle) => {
     safeRef.current = safe;
+    setSavedAngle(safe);
     setSetting("calibration", safe);
+  };
+
+  const onCalibrated = (safe: Angle) => {
+    saveAngle(safe);
     focusRef.current = START_FOCUS;
     setFocus(START_FOCUS);
     setPhase("starting");
-  }, []);
+  };
+
+  const onRecalibratedHome = (safe: Angle) => {
+    saveAngle(safe);
+    setPhase("home");
+  };
+
+  const onRecalibratedSession = (safe: Angle) => {
+    saveAngle(safe);
+    focusRef.current = { ...START_FOCUS, distractions: focusRef.current.distractions };
+    setFocus(focusRef.current);
+    setPhase("running");
+  };
+
+  const recalibrate = () => {
+    setSettingsOpen(false);
+    setPhase(phase === "home" ? "recalibrating-home" : "recalibrating-session");
+  };
 
   const onStarted = useCallback(() => {
     clockRef.current = startClock(Date.now());
@@ -114,18 +158,46 @@ export default function App() {
           chosenMemeId={chosenMemeId}
           onChooseMeme={chooseMeme}
           onOpenSession={openPastSession}
+          onOpenSettings={() => setSettingsOpen(true)}
         />
       )}
       {phase === "calibrating" && (
-        <Calibration status={status} reading={reading} onCalibrated={onCalibrated} onCancel={() => setPhase("home")} />
+        <Calibration
+          status={status}
+          reading={reading}
+          savedAngle={savedAngle}
+          onCalibrated={onCalibrated}
+          onCancel={() => setPhase("home")}
+        />
+      )}
+      {phase === "recalibrating-home" && (
+        <Calibration status={status} reading={reading} onCalibrated={onRecalibratedHome} onCancel={() => setPhase("home")} />
+      )}
+      {phase === "recalibrating-session" && (
+        <Calibration
+          status={status}
+          reading={reading}
+          onCalibrated={onRecalibratedSession}
+          onCancel={() => setPhase("running")}
+        />
       )}
       {phase === "starting" && <TitleCard text="Session Start!" onDone={onStarted} />}
       {(phase === "running" || phase === "paused") && (
-        <Session focus={focus} meme={memeById(chosenMemeId)} paused={phase === "paused"} onPause={pause} onPlay={play} onStop={stop} />
+        <Session
+          focus={focus}
+          meme={memeById(chosenMemeId)}
+          paused={phase === "paused"}
+          onPause={pause}
+          onPlay={play}
+          onStop={stop}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
       )}
       {phase === "paused" && <Pause />}
       {phase === "ending" && <TitleCard text="Session End" ending onDone={onEnded} />}
       {phase === "results" && stats && <Results stats={stats} onFinish={finish} />}
+
+      {settingsOpen && <Settings onRecalibrate={recalibrate} onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }

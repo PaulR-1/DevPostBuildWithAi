@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { formatDuration } from "../sessionClock";
 import { listSessions, type PastSession } from "../storage/focusDb";
 import MemeStorage from "./MemeStorage";
+import Profile from "./Profile";
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
@@ -10,11 +11,13 @@ export default function Home({
   chosenMemeId,
   onChooseMeme,
   onOpenSession,
+  onOpenSettings,
 }: {
   onStart: () => void;
   chosenMemeId: string;
   onChooseMeme: (id: string) => void;
   onOpenSession: (session: PastSession) => void;
+  onOpenSettings: () => void;
 }) {
   const [sessions, setSessions] = useState<PastSession[] | null>(null);
 
@@ -27,7 +30,12 @@ export default function Home({
       <header className="home-header">
         <img className="app-icon" src="/app-icon.svg" alt="" />
         <h1>FocusRot</h1>
+        <button className="pill-button settings-button" onClick={onOpenSettings}>
+          Settings
+        </button>
       </header>
+
+      <Profile />
 
       <section className="home-card">
         <h2>Past sessions</h2>

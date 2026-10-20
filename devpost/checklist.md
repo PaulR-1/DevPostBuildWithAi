@@ -29,7 +29,7 @@ Build mode: fast
   Learner check: Calibrate while looking at your laptop. Look away for a few seconds and watch the border go red. Look back before it is fully red and watch it go green. Then step out of frame and see it go red faster. Say whether the speed and sensitivity feel right.
   Commit: `Add calibration and green-to-red focus border`
 
-- [ ] **3. You can run a full session from the home page to the results**
+- [x] **3. You can run a full session from the home page to the results**
   Becomes usable: A home page with a start button. Start leads to calibration, then "Session Start!" on a black fade, then the camera session with the app-icon bubble. The bubble lets you pause ("Session Pause" until you press play) and stop. Stop shows "Session End", fades through black, and shows session length, elapsed time, and the distraction count, with Finish back to home. Start waits with the unblock note if the camera is blocked or your face is not visible.
   Why now: Now that the catch works, this wraps it in the Strava-style start-and-stop flow so the core journey runs end to end.
   PRD ref: `prd.md > The Core Journey` (steps 1, 3-6, 9-12), `prd.md > Screens and Layout`, `prd.md > Session controls`, `prd.md > States and Boundaries` (paused, session ended, camera blocked)
@@ -39,7 +39,7 @@ Build mode: fast
   Learner check: Start a session, pause for a bit, press play, then stop. Check that "Session Start!", "Session Pause", and "Session End" look the same, and that session length is shorter than elapsed time by about how long you paused.
   Commit: `Add home, session flow, pause, and results`
 
-- [ ] **4. Your chosen meme bonks you when the border finishes turning red**
+- [x] **4. Your chosen meme bonks you when the border finishes turning red**
   Becomes usable: Meme storage on the home page shows a few sample memes. You pick one before starting. During a session, when the border reaches full red, that meme pops up and the distraction count goes up by one. The results show the count, including zero.
   Why now: The bonk depends on the border and the session flow, which now both exist.
   PRD ref: `prd.md > Leaving the work`, `prd.md > The Core Journey` (steps 2, 7), `prd.md > Session history` (distraction count)
@@ -49,7 +49,7 @@ Build mode: fast
   Learner check: Choose a meme, start a session, and look away until the border is fully red. The meme should pop up. Look back, stop the session, and check the distraction count.
   Commit: `Add meme storage and meme bonk with distraction count`
 
-- [ ] **5. Your sessions, meme choice, and safe angle are still there after you close Chrome**
+- [x] **5. Your sessions, meme choice, and safe angle are still there after you close Chrome**
   Becomes usable: Finish saves the session. The home page lists past sessions as lines of text; tapping one opens its stats. With none yet, it says "Nothing here yet" and hints to press start. The chosen meme and safe angle are remembered too.
   Why now: Storage is safest to add once the data it holds has settled through slices 2-4.
   PRD ref: `prd.md > Session history`, `prd.md > The Core Journey` (step 12), `prd.md > States and Boundaries` (no past session yet)
@@ -59,7 +59,7 @@ Build mode: fast
   Learner check: Do a short session and press Finish. Close Chrome, reopen the page, and check the session is listed. Tap it to see its stats.
   Commit: `Save sessions, meme choice, and calibration in IndexedDB`
 
-- [ ] **6. You can edit your profile and use settings from home or the bubble**
+- [x] **6. You can edit your profile and use settings from home or the bubble**
   Becomes usable: Profile lets you set a photo and a favourite meme (display only; it does not pick the bonk meme). Settings shows Recalibrate, which saves a new safe angle, and Camera, which shows whether Chrome allowed the camera and shows the unblock note if not. Settings opens from the home page and from the session bubble.
   Why now: These finish the home page. They are smaller and depend on storage and calibration, which now exist.
   PRD ref: `prd.md > Session controls` (settings), `prd.md > Product Decisions` (profile and settings)
@@ -98,5 +98,7 @@ Activity mode: [live app and editor, explicit static fallback, focused alternati
 - Added MediaPipe Pose Landmarker (lite), run only when no face is found: body still in view means the face is hidden and the border holds; body gone means left the chair — the learner saw a hand over the face counted as leaving the chair, and chose a second model for clarity after hearing the cost. Spec Stack, Camera and Face Tracking, Focus State, and Failure Modes, plus PRD Leaving the chair, were updated.
 - Tracking runs on a ~30-per-second timer instead of animation frames — in slice 3 testing, Chrome slowed animation frames to about one per second when the window wasn't on screen, which starved calibration; a covered or hidden window during real study would do the same.
 - Added `src/tracking/useTracking.ts` (camera and tracking hook shared by calibration and session), `src/sessionClock.ts` (session length and elapsed time), and `src/screens/TitleCard.tsx` (shared "Session Start!" / "Session End" title) alongside the spec's file structure — calibration and session both need the same camera, and the three title screens share one style.
+- Calibration at start offers "Use saved angle" once one exists, and Settings > Recalibrate from home saves the angle that button reuses — without it, recalibrating from the home page saved an angle nothing ever used, because start always calibrates fresh.
+- Opening Settings during a session freezes the border (the session clock keeps running); recalibrating mid-session resets the border to green and keeps the distraction count — the PRD didn't say how the border behaves while Settings is open.
 - Red speeds slowed to 8 seconds (looking away) and 5 seconds total (left chair, including the grace) — learner asked for "a tad bit longer".
 

@@ -25,6 +25,37 @@ body,
   transform: scaleX(-1);
 }
 
+.focus-border {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: box-shadow 0.2s linear;
+}
+
+.calibrate-bar {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.7);
+  font-size: 1.1rem;
+}
+
+.calibrate-bar button {
+  font: inherit;
+  color: #fff;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.calibrate-bar button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .notice {
   position: absolute;
   top: 50%;

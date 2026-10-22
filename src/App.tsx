@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { memeById, SAMPLE_MEMES } from "./memes";
+import { isCustomMeme, memeById, SAMPLE_MEMES, type Meme } from "./memes";
 import Calibration from "./screens/Calibration";
 import Home from "./screens/Home";
 import Pause from "./screens/Pause";
 import Results, { type SessionStats } from "./screens/Results";
 import Session from "./screens/Session";
 import Settings from "./screens/Settings";
+import { usePresence } from "./screens/usePresence";
 import TitleCard from "./screens/TitleCard";
 import { elapsedMs, endClock, pauseClock, resumeClock, sessionLengthMs, startClock, type Clock } from "./sessionClock";
-import { addSession, getSetting, setSetting, type PastSession } from "./storage/focusDb";
+import { addSession, deleteSetting, getSetting, setSetting, type PastSession } from "./storage/focusDb";
+import type { ProfileData } from "./screens/Profile";
 import type { Reading } from "./tracking/faceTracking";
 import { START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
 import { useTracking } from "./tracking/useTracking";
@@ -38,11 +40,15 @@ export default function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [phase, setPhase] = useState<Phase>("home");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsPresence = usePresence(settingsOpen);
+  const [sessionsEpoch, setSessionsEpoch] = useState(0);
   const [focus, setFocus] = useState<Focus>(START_FOCUS);
   const [stats, setStats] = useState<SessionStats | null>(null);
   /** True when the results on screen are a past session, already saved. */
   const [viewingPast, setViewingPast] = useState(false);
   const [chosenMemeId, setChosenMemeId] = useState(SAMPLE_MEMES[0].id);
+  const [customMemes, setCustomMemes] = useState<Meme[]>([]);
+  const memes = [...SAMPLE_MEMES, ...customMemes];
   const [savedAngle, setSavedAngle] = useState<Angle | null>(null);
 
   const trackingFocus = phase === "running" && !settingsOpen;
@@ -54,8 +60,37 @@ export default function App() {
 
   useEffect(() => {
     getSetting<string>("chosenMemeId").then((id) => id && setChosenMemeId(id));
+    getSetting<Meme[]>("customMemes").then((saved) => {
+      if (!Array.isArray(saved)) return;
+      setCustomMemes(saved.filter((meme) => meme && typeof meme.id === "string" && typeof meme.name === "string" && typeof meme.src === "string"));
+    });
     getSetting<Angle>("calibration").then((a) => a && setSavedAngle(a));
   }, []);
+
+  const addMeme = (meme: Meme) => {
+    setCustomMemes((prev) => {
+      const next = [...prev, meme];
+      setSetting("customMemes", next);
+      return next;
+    });
+    chooseMeme(meme.id);
+  };
+
+  const removeMeme = (id: string) => {
+    setCustomMemes((prev) => {
+      const next = prev.filter((meme) => meme.id !== id);
+      setSetting("customMemes", next);
+      return next;
+    });
+    if (chosenMemeId === id) chooseMeme(SAMPLE_MEMES[0].id);
+    if (!isCustomMeme(id)) return;
+    getSetting<ProfileData>("profile").then((profile) => {
+      if (!profile?.favouriteMemeId || profile.favouriteMemeId !== id) return;
+      const next = { ...profile };
+      delete next.favouriteMemeId;
+      setSetting("profile", next);
+    });
+  };
 
   const chooseMeme = (id: string) => {
     setChosenMemeId(id);
@@ -99,6 +134,12 @@ export default function App() {
   const recalibrate = () => {
     setSettingsOpen(false);
     setPhase(phase === "home" ? "recalibrating-home" : "recalibrating-session");
+  };
+
+  const forgetCalibration = () => {
+    safeRef.current = null;
+    setSavedAngle(null);
+    deleteSetting("calibration").catch(() => {});
   };
 
   const onStarted = useCallback(() => {
@@ -155,10 +196,14 @@ export default function App() {
       {phase === "home" && (
         <Home
           onStart={() => setPhase("calibrating")}
+          memes={memes}
           chosenMemeId={chosenMemeId}
           onChooseMeme={chooseMeme}
+          onAddMeme={addMeme}
+          onRemoveMeme={removeMeme}
           onOpenSession={openPastSession}
           onOpenSettings={() => setSettingsOpen(true)}
+          sessionsEpoch={sessionsEpoch}
         />
       )}
       {phase === "calibrating" && (
@@ -185,7 +230,7 @@ export default function App() {
       {(phase === "running" || phase === "paused") && (
         <Session
           focus={focus}
-          meme={memeById(chosenMemeId)}
+          meme={memeById(chosenMemeId, memes)}
           paused={phase === "paused"}
           onPause={pause}
           onPlay={play}
@@ -197,7 +242,17 @@ export default function App() {
       {phase === "ending" && <TitleCard text="Session End" ending onDone={onEnded} />}
       {phase === "results" && stats && <Results stats={stats} onFinish={finish} />}
 
-      {settingsOpen && <Settings onRecalibrate={recalibrate} onClose={() => setSettingsOpen(false)} />}
+      {settingsPresence.mounted && (
+        <Settings
+          hasCalibration={savedAngle !== null}
+          onRecalibrate={recalibrate}
+          onForgetCalibration={forgetCalibration}
+          onSessionsCleared={() => setSessionsEpoch((n) => n + 1)}
+          onClose={() => setSettingsOpen(false)}
+          phase={settingsPresence.phase}
+          onTransitionEnd={settingsPresence.onTransitionEnd}
+        />
+      )}
     </div>
   );
 }

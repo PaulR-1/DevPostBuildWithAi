@@ -59,8 +59,9 @@ export default function Calibration({
   let message: string;
   if (status === "loading") message = "Loading face tracking…";
   else if (status === "tracking-unavailable") message = "Face tracking is unavailable. Check your internet and reload.";
-  else if (status === "camera-blocked" || faceMissing) message = "Unblock the camera and show your face.";
-  else if (step.name === "countdown") message = `Look at your laptop, phone, or notebook now… ${step.left}`;
+  else if (status === "camera-blocked") message = "Unblock the camera, then show your face.";
+  else if (faceMissing) message = "Show your face so FocusRot can see where you are looking.";
+  else if (step.name === "countdown") message = `Look at your laptop, phone, or notebook. ${step.left}`;
   else if (step.name === "sampling") message = "Hold still, keep looking…";
   else if (step.name === "failed") message = "Couldn't see your face while calibrating. Tilt a little less and try again.";
   else message = "Press calibrate, then look at your laptop, phone, or notebook.";
@@ -72,19 +73,21 @@ export default function Calibration({
       <div className="calibration-panel">
         <p>{message}</p>
         <div className="calibration-actions">
-          <button className="pill-button" onClick={onCancel}>
-            Back
-          </button>
           {canCalibrate && (
-            <button className="pill-button pill-button--primary" onClick={() => setStep({ name: "countdown", left: COUNTDOWN_SECONDS })}>
+            <button className="calibration-primary" onClick={() => setStep({ name: "countdown", left: COUNTDOWN_SECONDS })}>
               Calibrate
             </button>
           )}
-          {canCalibrate && savedAngle && (
-            <button className="pill-button" onClick={() => onCalibrated(savedAngle)}>
-              Use saved angle
+          <div className="calibration-secondary">
+            <button className="calibration-quiet" onClick={onCancel}>
+              Back
             </button>
-          )}
+            {canCalibrate && savedAngle && (
+              <button className="calibration-quiet" onClick={() => onCalibrated(savedAngle)}>
+                Use saved angle
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

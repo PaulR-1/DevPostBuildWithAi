@@ -11,7 +11,7 @@ export type PastSession = {
   distractions: number;
 };
 
-export type SettingKey = "chosenMemeId" | "calibration" | "profile";
+export type SettingKey = "chosenMemeId" | "calibration" | "profile" | "customMemes";
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -46,8 +46,16 @@ export async function setSetting(key: SettingKey, value: unknown): Promise<void>
   await run(SETTINGS, "readwrite", (s) => s.put(value, key));
 }
 
+export async function deleteSetting(key: SettingKey): Promise<void> {
+  await run(SETTINGS, "readwrite", (s) => s.delete(key));
+}
+
 export async function addSession(session: PastSession): Promise<void> {
   await run(SESSIONS, "readwrite", (s) => s.add(session));
+}
+
+export async function clearSessions(): Promise<void> {
+  await run(SESSIONS, "readwrite", (s) => s.clear());
 }
 
 /** Newest first. */

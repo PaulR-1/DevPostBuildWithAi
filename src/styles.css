@@ -1409,3 +1409,490 @@ button:active {
     transition: opacity 150ms linear;
   }
 }
+
+/* ── FocusRot glass system ──────────────────────────────────────────────── */
+:root {
+  --ink: #eafff2;
+  --muted-ink: #b9d7c4;
+  --quiet-ink: #87aa96;
+  --night: #030c07;
+  --night-deep: #010502;
+  --glass: rgba(10, 39, 25, 0.62);
+  --glass-raised: rgba(18, 61, 38, 0.7);
+  --glass-edge: rgba(151, 255, 193, 0.2);
+  --glass-edge-strong: rgba(151, 255, 193, 0.38);
+  --focus-green: #58f49d;
+  --focus-green-bright: #b7ffd3;
+  --danger: #ff6b75;
+  --panel-radius: 22px;
+}
+
+html,
+body,
+#root {
+  background:
+    radial-gradient(circle at 14% 2%, rgba(53, 255, 132, 0.24), transparent 25rem),
+    radial-gradient(circle at 96% 82%, rgba(45, 203, 100, 0.17), transparent 23rem),
+    linear-gradient(145deg, var(--night-deep), var(--night));
+  color: var(--ink);
+}
+
+body {
+  selection-background-color: var(--focus-green);
+  selection-color: #031009;
+}
+
+::selection {
+  background: var(--focus-green);
+  color: #031009;
+}
+
+.app {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% -16%, rgba(75, 244, 142, 0.18), transparent 32rem),
+    radial-gradient(circle at -8% 88%, rgba(21, 137, 72, 0.14), transparent 28rem);
+}
+
+.app::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(188, 255, 213, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(188, 255, 213, 0.025) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(circle at 50% 45%, black, transparent 82%);
+}
+
+button {
+  color: inherit;
+}
+
+:focus-visible {
+  outline-color: var(--focus-green-bright);
+  outline-offset: 4px;
+}
+
+.muted {
+  color: var(--muted-ink);
+}
+
+/* Home: a calm, luminous control surface rather than a stack of dark cards. */
+.home {
+  width: min(100%, 1180px);
+}
+
+.home-body {
+  gap: clamp(0.8rem, 1.8vw, 1.2rem);
+  padding: clamp(1rem, 2.4vmin, 1.6rem) clamp(1rem, 3vw, 2rem) max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.home-header {
+  min-height: 62px;
+  padding: 0.55rem 0.25rem;
+}
+
+.home-header h1 {
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  font-size: clamp(1.65rem, 2.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.055em;
+}
+
+.app-icon {
+  filter: drop-shadow(0 0 18px rgba(88, 244, 157, 0.3));
+}
+
+.home-card {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1rem, 2.2vw, 1.35rem);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--panel-radius);
+  background: linear-gradient(125deg, rgba(34, 94, 60, 0.68), rgba(5, 28, 16, 0.58));
+  box-shadow: inset 0 1px 0 rgba(224, 255, 235, 0.08);
+  backdrop-filter: blur(22px) saturate(135%);
+  -webkit-backdrop-filter: blur(22px) saturate(135%);
+}
+
+.home-card::before {
+  content: "";
+  position: absolute;
+  top: -7rem;
+  right: -8rem;
+  width: 14rem;
+  height: 14rem;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(101, 255, 164, 0.14), transparent 68%);
+}
+
+.home-card h2 {
+  position: relative;
+  margin-bottom: 0.5rem;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.home-launch {
+  gap: 1rem;
+  background: linear-gradient(125deg, rgba(39, 117, 73, 0.76), rgba(7, 37, 21, 0.68));
+  border-color: var(--glass-edge-strong);
+}
+
+.home-launch-meme {
+  width: 72px;
+  height: 72px;
+  border: 1px solid rgba(210, 255, 227, 0.3);
+  border-radius: 18px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.home-launch-copy p,
+.home-focus dt {
+  color: var(--muted-ink);
+}
+
+.home-launch-copy strong {
+  margin-top: 0.18rem;
+  color: var(--ink);
+  font-size: clamp(1.25rem, 2.6vw, 1.65rem);
+  letter-spacing: -0.045em;
+}
+
+.home-focus {
+  border-color: rgba(178, 255, 207, 0.14);
+}
+
+.home-focus dd {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.home-focus-bonks dt,
+.home-focus-bonks dd {
+  color: var(--focus-green);
+}
+
+.home-focus-bonks dd {
+  text-shadow: none;
+}
+
+.focus-bars {
+  height: 3rem;
+}
+
+.focus-bar::before {
+  background: rgba(116, 251, 164, 0.24);
+}
+
+.focus-bar:last-child::before,
+.focus-bar:hover::before {
+  background: var(--focus-green);
+  box-shadow: 0 0 16px rgba(88, 244, 157, 0.34);
+}
+
+.start-button,
+.calibration-primary,
+.pill-button--primary {
+  border: 1px solid rgba(227, 255, 237, 0.36);
+  background: var(--focus-green);
+  color: #052212;
+  box-shadow: none;
+}
+
+.start-button:hover,
+.calibration-primary:hover,
+.pill-button--primary:hover {
+  background: var(--focus-green-bright);
+  transform: translateY(-1px);
+}
+
+.session-list button {
+  border-color: rgba(190, 255, 215, 0.12);
+  color: var(--ink);
+}
+
+.session-when,
+.session-list button:hover .session-when {
+  color: var(--muted-ink);
+}
+
+.session-count {
+  color: var(--focus-green-bright);
+}
+
+/* Meme picker keeps the library playful but makes the selection easy to scan. */
+.meme-choice,
+.meme-add {
+  border-color: rgba(185, 255, 212, 0.12);
+  border-radius: 14px;
+  background: rgba(1, 15, 8, 0.48);
+  color: var(--muted-ink);
+}
+
+.meme-choice:hover,
+.meme-add:hover:not(:disabled) {
+  border-color: rgba(129, 255, 180, 0.48);
+  background: rgba(44, 139, 83, 0.24);
+}
+
+.meme-choice--chosen {
+  border-color: var(--focus-green);
+  background: rgba(55, 184, 103, 0.22);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px rgba(183, 255, 211, 0.16);
+}
+
+.meme-add-mark {
+  background: rgba(88, 244, 157, 0.09);
+  color: var(--focus-green);
+}
+
+.meme-remove {
+  background: rgba(4, 18, 10, 0.84);
+  border: 1px solid rgba(209, 255, 226, 0.18);
+}
+
+/* Floating and modal surfaces use the same material, only denser. */
+.account-button,
+.bubble-icon {
+  border: 1px solid var(--glass-edge-strong);
+  background: rgba(6, 33, 18, 0.68);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(234, 255, 240, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.account-button:hover,
+.bubble-icon:hover {
+  background: rgba(37, 110, 68, 0.7);
+  border-color: rgba(183, 255, 211, 0.54);
+}
+
+.account-menu,
+.bubble-menu {
+  border-color: var(--glass-edge);
+  background: rgba(5, 27, 15, 0.86);
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(234, 255, 240, 0.08);
+  backdrop-filter: blur(20px) saturate(135%);
+  -webkit-backdrop-filter: blur(20px) saturate(135%);
+}
+
+.account-menu button:hover,
+.bubble-menu button:hover {
+  background: rgba(94, 245, 153, 0.14);
+}
+
+.calibration-panel {
+  border-color: var(--glass-edge-strong);
+  background: rgba(6, 32, 18, 0.74);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(224, 255, 235, 0.1);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+}
+
+.calibration-panel p {
+  color: var(--ink);
+}
+
+.calibration-quiet {
+  color: var(--muted-ink);
+}
+
+.calibration-quiet:hover {
+  color: var(--focus-green-bright);
+}
+
+.pill-button {
+  border-color: var(--glass-edge);
+  background: rgba(245, 255, 249, 0.08);
+  color: var(--ink);
+}
+
+.pill-button:hover {
+  background: rgba(183, 255, 211, 0.14);
+}
+
+.text-button {
+  color: var(--focus-green-bright);
+}
+
+.text-button--danger,
+.settings-warning,
+.meme-note--error {
+  color: #ff9ba1;
+}
+
+.pill-button--danger {
+  border-color: rgba(255, 192, 196, 0.28);
+  background: var(--danger);
+  color: #2e0408;
+}
+
+.pill-button--danger:hover {
+  background: #ff939b;
+}
+
+.settings-backdrop {
+  background: rgba(0, 9, 4, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.settings {
+  border-color: var(--glass-edge-strong);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(30, 83, 52, 0.9), rgba(4, 27, 15, 0.9));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.46), inset 0 1px 0 rgba(238, 255, 243, 0.12);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+}
+
+.settings h2 {
+  color: var(--ink);
+}
+
+.settings-group + .settings-group {
+  border-color: rgba(183, 255, 211, 0.14);
+}
+
+.settings-group h3,
+.profile-field,
+.profile-favourite,
+.meme-draft label {
+  color: var(--muted-ink);
+}
+
+.profile-field input,
+.meme-draft input,
+.profile-favourite select {
+  border-color: rgba(183, 255, 211, 0.2);
+  background-color: rgba(0, 14, 7, 0.66);
+  color: var(--ink);
+}
+
+.profile-photo,
+.profile-favourite-pick img,
+.meme-draft img {
+  border: 1px solid var(--glass-edge);
+  background: rgba(0, 14, 7, 0.66);
+}
+
+/* Results become a single, settled moment after the camera session. */
+.results {
+  position: relative;
+  isolation: isolate;
+}
+
+.results::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: min(70vmin, 620px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(67, 240, 133, 0.18), transparent 67%);
+  filter: blur(8px);
+}
+
+.results h1 {
+  color: var(--ink);
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  font-size: clamp(1.65rem, 4vw, 2.2rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+}
+
+.stats {
+  gap: 0.85rem;
+}
+
+.stats div {
+  border-color: var(--glass-edge);
+  border-radius: 20px;
+  background: rgba(8, 38, 23, 0.7);
+  box-shadow: inset 0 1px 0 rgba(234, 255, 240, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.stats dt,
+.stats p {
+  color: var(--muted-ink);
+}
+
+.stats dd {
+  color: var(--ink);
+}
+
+.stats-hero {
+  border-color: var(--glass-edge-strong) !important;
+  background: linear-gradient(135deg, rgba(45, 130, 79, 0.75), rgba(6, 35, 20, 0.78)) !important;
+}
+
+.stats-hero dd {
+  color: var(--focus-green-bright);
+  text-shadow: none;
+}
+
+/* Session overlay retains an unobstructed camera while making the controls coherent. */
+.focus-border {
+  transition: box-shadow 420ms var(--ease-out);
+}
+
+.meme-bonk img {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.title-card {
+  background: radial-gradient(circle at 50% 40%, rgba(31, 102, 59, 0.24), rgba(0, 4, 2, 0.96) 58%);
+}
+
+.big-title {
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  text-transform: none;
+  text-shadow: 0 0 38px rgba(88, 244, 157, 0.3);
+}
+
+@media (min-width: 680px) and (min-height: 600px) {
+  .home {
+    width: min(100%, 1180px);
+  }
+
+  .home-body {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .home-header {
+    min-height: 54px;
+  }
+
+  .home-card {
+    border-radius: 18px;
+  }
+
+  .home-launch-meme {
+    width: 60px;
+    height: 60px;
+  }
+
+  .stats div {
+    border-radius: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .start-button:hover,
+  .calibration-primary:hover,
+  .pill-button--primary:hover {
+    transform: none;
+  }
+}

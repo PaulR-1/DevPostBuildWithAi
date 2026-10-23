@@ -39,7 +39,7 @@ If it is not needed to prove that catch, it is not in this proof.
 
 ## Later
 
-- A chance to come back, then an intervention at an intensity you set: a meme or a sound on the feed of yourself.
+- An intervention intensity you set, and a sound on the feed of yourself. The chance to come back and the meme bonk itself are in the proof now; see `prd.md > Leaving the work`.
 - Fun public shaming: a friend can take a snapshot of your surprised face as you look back at the screen and share it. An MP4 option stays a note for later.
 - Shared rooms, inviting friends, and collaboration.
 - A phone border and a floating circle while you are in another app. An Android phone can draw that overlay after you allow it. An iPhone cannot.
@@ -48,5 +48,5 @@ If it is not needed to prove that catch, it is not in this proof.
 
 ## Explicitly Cut
 
-- Treating every look away as an instant failure. You want a chance to come back before any intervention. The intervention itself is later. The instant-fail version from the original PDF is out.
+- Treating every look away as an instant failure. You still get a chance to come back before the meme bonks you. The instant-fail version from the original PDF is out.
 - An iPhone app that draws a border and a floating circle over other apps. An iPhone cannot do that, so this project does not promise it.

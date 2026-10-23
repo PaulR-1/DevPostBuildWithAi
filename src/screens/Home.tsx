@@ -41,7 +41,7 @@ export default function Home({
   memes: Meme[];
   chosenMemeId: string;
   onChooseMeme: (id: string) => void;
-  onAddMeme: (meme: Meme) => void;
+  onAddMeme: (meme: Meme) => Promise<void>;
   onRemoveMeme: (id: string) => void;
   onOpenSession: (session: PastSession) => void;
   onOpenSettings: () => void;

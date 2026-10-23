@@ -67,12 +67,11 @@ export default function App() {
     getSetting<Angle>("calibration").then((a) => a && setSavedAngle(a));
   }, []);
 
-  const addMeme = (meme: Meme) => {
-    setCustomMemes((prev) => {
-      const next = [...prev, meme];
-      setSetting("customMemes", next);
-      return next;
-    });
+  /** Rejects when the browser refuses to store it, so the meme never shows without being saved. */
+  const addMeme = async (meme: Meme) => {
+    const next = [...customMemes, meme];
+    await setSetting("customMemes", next);
+    setCustomMemes(next);
     chooseMeme(meme.id);
   };
 
@@ -137,9 +136,13 @@ export default function App() {
   };
 
   const forgetCalibration = () => {
-    safeRef.current = null;
+    // Keep the live angle so the border does not freeze if they cancel the new calibrate.
     setSavedAngle(null);
     deleteSetting("calibration").catch(() => {});
+    if (phase === "running") {
+      setSettingsOpen(false);
+      setPhase("recalibrating-session");
+    }
   };
 
   const onStarted = useCallback(() => {

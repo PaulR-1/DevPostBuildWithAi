@@ -75,13 +75,13 @@ PRD ref: `prd.md > The Core Journey`.
 
 ### Settings
 
-Opens from the account menu and from the session bubble. Safe angle can be recalibrated or forgotten. Camera shows whether Chrome has allowed the camera, can ask Chrome to allow it, and shows the unblock message when it has not. History deletes every saved session after a confirm.
+Opens from the account menu and from the session bubble. Safe angle can be recalibrated or forgotten. Forget during a running session sends you to calibrate again; the live angle stays until that finishes, so the border does not freeze. Camera shows whether Chrome has allowed the camera, can ask Chrome to allow it, and shows the unblock message when it has not. History deletes every saved session after a confirm.
 
 PRD ref: `prd.md > Session controls`.
 
 ### Meme Storage
 
-Shows the sample memes and up to 20 images you add. Saves the one chosen for the next session. An added image is shrunk to fit inside a 480 pixel square and stored in IndexedDB. Removing one of your images also clears it if it was the profile favourite.
+Shows the sample memes and up to 20 images you add. Saves the one chosen for the next session. An added image is shrunk to fit inside a 480 pixel square and stored in IndexedDB. It only appears in the grid after that save works. If the browser's storage is full, a note says so and the image is not added. Removing one of your images also clears it if it was the profile favourite.
 
 PRD ref: `prd.md > Leaving the work`.
 

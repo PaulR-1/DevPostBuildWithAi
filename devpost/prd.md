@@ -73,7 +73,7 @@ Noted before removal, as you asked: slumping is out. No slouch detection, no "ba
 
 The bubble is the app icon. Clicking it can stop the session, pause the session, or open settings.
 
-Settings opens from the account menu and from the session bubble. Safe angle can be recalibrated, or forgotten. Camera shows whether the camera is allowed, and can ask Chrome to allow it. History can delete every saved session from this browser, after you confirm.
+Settings opens from the account menu and from the session bubble. Safe angle can be recalibrated, or forgotten. Forget during a running session closes Settings and asks you to calibrate again. The border keeps using the last angle until that new calibrate finishes, so it does not freeze. Camera shows whether the camera is allowed, and can ask Chrome to allow it. History can delete every saved session from this browser, after you confirm.
 
 Pause shows the words "Session Pause" in the same font as "Session Start!" That screen stays until you unpause. The pause button’s place shows a play button. You press play to unpause.
 

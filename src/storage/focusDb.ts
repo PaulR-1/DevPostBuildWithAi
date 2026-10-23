@@ -32,9 +32,12 @@ function openDb(): Promise<IDBDatabase> {
 async function run<T>(store: string, mode: IDBTransactionMode, action: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
-    const request = action(db.transaction(store, mode).objectStore(store));
+    const tx = db.transaction(store, mode);
+    const request = action(tx.objectStore(store));
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error ?? new Error("storage refused the write"));
   });
 }
 

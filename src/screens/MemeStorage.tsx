@@ -11,13 +11,14 @@ export default function MemeStorage({
   memes: Meme[];
   chosenId: string;
   onChoose: (id: string) => void;
-  onAdd: (meme: Meme) => void;
+  onAdd: (meme: Meme) => Promise<void>;
   onRemove: (id: string) => void;
 }) {
   const fileInput = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<{ src: string; name: string } | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const customCount = memes.filter((meme) => isCustomMeme(meme.id)).length;
   const full = customCount >= CUSTOM_MEME_LIMIT;
   const confirming = memes.find((meme) => meme.id === confirmId) ?? null;
@@ -35,11 +36,19 @@ export default function MemeStorage({
     }
   };
 
-  const addDraft = () => {
-    if (!draft) return;
+  const addDraft = async () => {
+    if (!draft || saving) return;
     const name = draft.name.trim().slice(0, MEME_NAME_LIMIT) || "My meme";
-    onAdd({ id: `custom-${crypto.randomUUID()}`, name, src: draft.src });
-    setDraft(null);
+    setSaving(true);
+    try {
+      await onAdd({ id: `custom-${crypto.randomUUID()}`, name, src: draft.src });
+      setDraft(null);
+      setError(null);
+    } catch {
+      setError("The browser's storage is full, so that meme wasn't saved. Remove one and try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -101,8 +110,8 @@ export default function MemeStorage({
             <button className="text-button" onClick={() => setDraft(null)}>
               Cancel
             </button>
-            <button className="pill-button pill-button--primary" onClick={addDraft}>
-              Add
+            <button className="pill-button pill-button--primary" onClick={addDraft} disabled={saving}>
+              {saving ? "Saving…" : "Add"}
             </button>
           </div>
         </div>

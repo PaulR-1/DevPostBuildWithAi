@@ -63,25 +63,25 @@ From `prd.md > Look and Feel` and `scope.md > Inspiration & Identity`:
 
 ### Home Screen
 
-Shows profile, settings, meme storage, past-session text, and start. Reads IndexedDB.
+Shows an account menu, a launch card, meme storage, and past-session text. The launch card shows the chosen meme, Start, and totals read from IndexedDB: Bonks, focus time, session count, and a day streak. The streak counts days in a row that have a saved session, and it still counts if the latest session was yesterday. The last eight sessions also draw as bars. Tapping a bar or a past-session line opens that session's stats.
 
-PRD ref: `prd.md > The Core Journey`.
+PRD ref: `prd.md > The Core Journey`, `prd.md > Session history`.
 
 ### Profile
 
-Edits the profile photo and the favourite meme display. Saves both in IndexedDB. The favourite meme does not choose the bonk meme.
+Opens from the account menu. Edits the name, profile photo, and favourite meme display. Saves them in IndexedDB. The favourite meme does not choose the bonk meme. The name is at most 24 characters.
 
 PRD ref: `prd.md > The Core Journey`.
 
 ### Settings
 
-Recalibrate saves a new safe eye angle. Camera shows whether Chrome has allowed the camera, and shows the unblock message when it has not.
+Opens from the account menu and from the session bubble. Safe angle can be recalibrated or forgotten. Camera shows whether Chrome has allowed the camera, can ask Chrome to allow it, and shows the unblock message when it has not. History deletes every saved session after a confirm.
 
 PRD ref: `prd.md > Session controls`.
 
 ### Meme Storage
 
-Shows the meme choices and saves the one chosen for the next session.
+Shows the sample memes and up to 20 images you add. Saves the one chosen for the next session. An added image is shrunk to fit inside a 480 pixel square and stored in IndexedDB. Removing one of your images also clears it if it was the profile favourite.
 
 PRD ref: `prd.md > Leaving the work`.
 
@@ -99,7 +99,7 @@ PRD ref: `prd.md > Calibration`.
 
 ### Focus State
 
-Compares the live eye angle with the safe angle. A visible face inside the safe angle is on the work. Eyes off that angle mean drifting or left the work. No visible face and no visible body means left the chair. A hidden face with your body still in view holds the border where it is.
+Compares the live eye angle with the safe angle. A visible face inside the safe angle is on the work. Eyes off that angle turn the border red in about 6.4 seconds, then count one Bonk. No visible face and no visible body, for longer than 1 second, means left the chair: the border then reaches red in about 3.3 seconds total, without you pressing pause. A hidden face with your body still in view holds the border where it is. Looking back turns the border green again in about 3 seconds.
 
 PRD ref: `prd.md > On-work border`, `prd.md > Leaving the work`, `prd.md > Leaving the chair`.
 
@@ -111,13 +111,13 @@ PRD ref: `prd.md > Session controls`.
 
 ### Meme Bonk
 
-Shows the chosen meme when the border finishes turning red, and adds one distraction.
+Shows the chosen meme when the border finishes turning red, and adds one Bonk. The count is labeled Bonks on the results screen and on the home page.
 
 PRD ref: `prd.md > Leaving the work`.
 
 ### Session History
 
-Saves and lists session length, elapsed time, and distraction count. The empty home state says "Nothing here yet" and hints to press start.
+Saves and lists session length, elapsed time, and the Bonk count. The empty home state says "Nothing here yet" and hints to press start. Settings can delete the whole list.
 
 PRD ref: `prd.md > Session history`.
 
@@ -125,13 +125,13 @@ PRD ref: `prd.md > Session history`.
 
 All of this lives in IndexedDB in Chrome on this laptop.
 
-- **Profile:** photo and favourite meme.
-- **Meme library:** the images you can choose. The build starts with a few sample images in the project. Your chosen bonk meme is saved separately.
-- **Calibration:** the safe eye angle.
-- **Current session:** running, paused, or ended; start time; paused time; distraction count; chosen meme.
-- **Past sessions:** session length, elapsed time, and distraction count. The home page shows each as a line of text.
+- **Profile:** name, photo, and favourite meme.
+- **Meme library:** four sample images in the project, plus up to 20 images you add. Your chosen bonk meme is saved separately.
+- **Calibration:** the safe eye angle. Settings can delete it.
+- **Current session:** running, paused, or ended; start time; paused time; Bonk count; chosen meme.
+- **Past sessions:** session length, elapsed time, and Bonk count. The home page lists each line and sums them into Bonks, focus time, session count, and the day streak.
 
-Closing Chrome keeps this data. Clearing the site's browser data removes it.
+Closing Chrome keeps this data. Clearing the site's browser data removes it. Settings can delete past sessions without touching the profile, memes, or safe angle.
 
 ## File Structure
 
@@ -143,17 +143,25 @@ project/
 ├── src/
 │   ├── main.tsx
 │   ├── App.tsx
+│   ├── memes.ts
+│   ├── sessionClock.ts
 │   ├── screens/
 │   │   ├── Home.tsx
+│   │   ├── AccountMenu.tsx
 │   │   ├── Profile.tsx
 │   │   ├── Settings.tsx
 │   │   ├── MemeStorage.tsx
 │   │   ├── Calibration.tsx
 │   │   ├── Session.tsx
 │   │   ├── Pause.tsx
-│   │   └── Results.tsx
+│   │   ├── Results.tsx
+│   │   ├── TitleCard.tsx
+│   │   ├── useDialog.ts
+│   │   └── usePresence.ts
 │   ├── tracking/
-│   │   └── faceTracking.ts
+│   │   ├── faceTracking.ts
+│   │   ├── focusState.ts
+│   │   └── useTracking.ts
 │   ├── storage/
 │   │   └── focusDb.ts
 │   └── styles.css
@@ -172,7 +180,7 @@ project/
 ## Important Failure Modes
 
 - **Camera blocked or face missing before start** → show the note to unblock the camera and show your face. Wait to show "Session Start!" Implements `prd.md > States and Boundaries`.
-- **Face disappears during a session** → if your body is also gone for more than a short blip, treat it as leaving the chair and turn the border red faster. If your body is still there, the face is just hidden (for example a hand over it), and the border holds. Implements `prd.md > Leaving the chair`.
+- **Face disappears during a session** → if your body is also gone for more than 1 second, treat it as leaving the chair and turn the border fully red in about 3.3 seconds. If your body is still there, the face is just hidden (for example a hand over it), and the border holds. Implements `prd.md > Leaving the chair`.
 - **MediaPipe cannot load** → say face tracking is unavailable. Do not run a session that pretends to see you.
 
 ## What Was Simplified and Why
@@ -180,7 +188,7 @@ project/
 - **A Chrome page** instead of an installed app. You asked to open it in Chrome now and think about an app after the basics work.
 - **MediaPipe on the laptop** instead of a paid camera service. The video stays on the computer.
 - **IndexedDB for one person** instead of accounts and friend rooms. Friends are later in `scope.md > Later`.
-- **A few sample meme images** instead of uploads, random choice, sound, and text-to-speech. Those extras are deferred in `prd.md > Deferred From the POC`. The demo video still needs permission for any copyrighted meme or music.
+- **Your own meme images, up to 20, shrunk before they are saved** instead of random choice, sound, and text-to-speech. Those extras stay deferred in `prd.md > Deferred From the POC`. The demo video still needs permission for any copyrighted meme or music.
 
 ## Decisions and Open Issues
 
@@ -188,7 +196,7 @@ project/
 - **Chosen by you:** MediaPipe. The tradeoff is a larger first download.
 - **Chosen by you:** React and TypeScript. The tradeoff is more setup and more errors to read.
 - **Chosen by you:** IndexedDB. The tradeoff is more code than a small text note.
-- **Derived from those choices:** Vite starts the page. A missing face during a session means you left the chair, because `prd.md > Leaving the chair` already defines that behavior.
+- **Derived from those choices:** Vite starts the page. A missing face during a session means you left the chair only when your body is gone too, because `prd.md > Leaving the chair` treats a hidden face with your body still in view as still seated.
 - **Clarified earlier:** Devpost allows a laptop demo. It needs a public repository and a public video under three minutes. A live website is optional.
 - **Check during the build:** use the laptop camera early and confirm that the saved eye angle can tell "on the work" from "looking away" well enough for the green and red border. If it is too jumpy, adjust the sensitivity before adding more screens.
 - **Open questions from the PRD:** none.

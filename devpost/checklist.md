@@ -101,4 +101,6 @@ Activity mode: [live app and editor, explicit static fallback, focused alternati
 - Calibration at start offers "Use saved angle" once one exists, and Settings > Recalibrate from home saves the angle that button reuses — without it, recalibrating from the home page saved an angle nothing ever used, because start always calibrates fresh.
 - Opening Settings during a session freezes the border (the session clock keeps running); recalibrating mid-session resets the border to green and keeps the distraction count — the PRD didn't say how the border behaves while Settings is open.
 - Red speeds slowed to 8 seconds (looking away) and 5 seconds total (left chair, including the grace) — learner asked for "a tad bit longer".
+- Looking away now reaches a Bonk in about 6.4 seconds, 25% faster than 8. Leaving the chair without pausing reaches full red in about 3.3 seconds, 50% faster than 5, and the missed-face grace moved from 1.5 seconds to 1 second with that same speedup — the learner asked for both before the final review. The session clock is unchanged.
+- Home launch totals, the day streak, custom meme images, a profile name, and Settings actions to forget the safe angle or clear sessions came in with the home-screen polish. `prd.md`, `spec.md`, and `scope.md > Later` now describe them. Streaks had been listed as later.
 

@@ -21,14 +21,14 @@ export const FOCUS_SETTINGS = {
   yawTolerance: 15,
   /** Degrees up/down of the safe angle that still count as on the work. */
   pitchTolerance: 12,
-  /** Seconds of looking away to go from fully green to fully red. */
-  secondsToRedLookingAway: 8,
-  /** Seconds out of the chair to go from fully green to fully red. */
-  secondsToRedLeftChair: 3.5,
+  /** Seconds of looking away to go from fully green to fully red. 25% faster than the earlier 8 seconds, so the Bonk count arrives sooner. */
+  secondsToRedLookingAway: 6.4,
+  /** Seconds of redness after the grace when you have left the chair. With the grace, full red is about 3.3 seconds: 50% faster than the earlier 5. */
+  secondsToRedLeftChair: 3.5 / 1.5,
   /** Seconds of looking back to go from fully red to fully green. */
   secondsToGreen: 3,
-  /** Face and body missing for less than this is a tracking blip, not leaving the chair. */
-  leftChairGraceSeconds: 1.5,
+  /** Face and body missing for less than this is a tracking blip, not leaving the chair. Scaled with the faster leave-the-screen timer. */
+  leftChairGraceSeconds: 1,
   /** How much each new frame moves the smoothed angle (0 to 1). */
   smoothing: 0.25,
 };

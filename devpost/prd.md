@@ -26,11 +26,11 @@ Source: `scope.md > The Core Loop`, `scope.md > What "Working" Looks Like`, `sco
 
 ## Screens and Layout
 
-- **Opening page.** Profile, settings, past Focus sessions, meme and brainrot storage, and the start icon. These stay off the session screen.
+- **Opening page.** An account menu opens Profile and Settings. A launch card shows the chosen meme and Start, plus totals for Bonks, focus time, sessions, and a day streak. Meme storage and past sessions sit below that. These stay off the session screen.
 - **Calibration.** You see the ask to look at your laptop, phone, or notebook. This happens before "Session Start!"
 - **Session.** Your camera fills the screen. The only extra control is the small app-icon bubble. The border around the edges of the screen is the sign of whether you are on the work.
 - **Session end.** "Session End" shows in the same style as "Session Start!" The screen then fades through black.
-- **Session analytics.** You see session length, elapsed time, and the distraction count. A Finish button takes you back to the home page.
+- **Session analytics.** You see session length, elapsed time, and the Bonk count. A Finish button takes you back to the home page.
 - **Past session.** On the home page, each past session is a line of text you tap to open those same stats. Cards wait for later. The first time, when there is no past session, that spot shows "Nothing here yet" and a hint to press start.
 
 ## Look and Feel
@@ -59,11 +59,11 @@ Your eyes leave the safe angle. The border slowly turns from green to red. It do
 
 You look back before the border is fully red. The border slowly becomes green again.
 
-You do not look back. The border finishes turning red. The meme you chose before the session pops up and bonks you. That counts as one distraction. The meme does not appear the instant you look away. `scope.md > Explicitly Cut` gives you a chance to come back first.
+You do not look back. The border finishes turning red in about 6.4 seconds. That is 25% faster than the earlier 8 seconds, so the Bonk count goes up sooner. The meme you chose before the session pops up and bonks you. That counts as one Bonk. The meme does not appear the instant you look away. `scope.md > Explicitly Cut` gives you a chance to come back first.
 
 ### Leaving the chair
 
-You leave your chair. The border turns red faster than it does for a look away.
+You leave your chair and you do not pause. The border reaches full red in about 3.3 seconds. That is 50% faster than the earlier 5 seconds, and still faster than a look away. A gap shorter than 1 second does not count. The session clock does not speed up. Only the border does.
 
 You cover your face, for example with your hand, but you are still in your chair. That is not leaving the chair. The border stays where it is until FocusRot can see your eyes again. You chose this at the first build checkpoint, for clarity.
 
@@ -73,7 +73,7 @@ Noted before removal, as you asked: slumping is out. No slouch detection, no "ba
 
 The bubble is the app icon. Clicking it can stop the session, pause the session, or open settings.
 
-Settings shows two things, from the opening page and from the session bubble. Recalibrate asks you to look at your laptop, phone, or notebook again, and FocusRot saves a new safe eye angle. Camera shows whether the camera is allowed. If it is blocked, you get the same note to unblock the camera and show your face.
+Settings opens from the account menu and from the session bubble. Safe angle can be recalibrated, or forgotten. Camera shows whether the camera is allowed, and can ask Chrome to allow it. History can delete every saved session from this browser, after you confirm.
 
 Pause shows the words "Session Pause" in the same font as "Session Start!" That screen stays until you unpause. The pause button’s place shows a play button. You press play to unpause.
 
@@ -81,9 +81,9 @@ Stop ends the session. The screen shows "Session End," like the start, then fade
 
 ### Session history
 
-A finished session keeps three stats. Session length is how long it ran, and paused time is not included. Elapsed time is all of the time combined, including paused time. The distraction count includes zero. More stats can wait.
+A finished session keeps three stats. Session length is how long it ran, and paused time is not included. Elapsed time is all of the time combined, including paused time. The Bonk count includes zero. On the home page those sessions also add up: total Bonks, total focus time, how many sessions, a streak of days in a row, and a bar for each of the last eight sessions.
 
-You count one distraction when the meme comes out. The meme comes out when the border finishes turning red and you have not come back. You already said this.
+You count one Bonk when the meme comes out. The meme comes out when the border finishes turning red and you have not come back. Looking away reaches that in about 6.4 seconds. Leaving the chair without pausing reaches it in about 3.3 seconds.
 
 ## States and Boundaries
 
@@ -109,9 +109,9 @@ You count one distraction when the meme comes out. The meme comes out when the b
 - With no past session yet, the spot shows "Nothing here yet" and a hint to press start. You chose both.
 - If the camera is off or your face cannot be seen when you press start, a notification tells you to unblock the camera and show your face. FocusRot waits until it can see your face before "Session Start!" You confirmed that wait.
 - Pause shows "Session Pause" in the same font as "Session Start!" and stays on that screen until you unpause. You press the play button in the pause button’s place to unpause.
-- Settings shows recalibrate and camera. Recalibrate saves a new safe eye angle from your laptop, phone, or notebook. Camera shows whether the camera is allowed. If it is blocked, it tells you to unblock the camera and show your face. You added both.
-- Profile shows a profile photo and a favourite meme. The favourite meme is a display. Later, other people can see which meme you like best. It does not pick the meme for today's session.
-- There are many memes that can bonk you. Before a session starts, you choose which one will bonk you. You already described this, and it matches the meme vault in the original FocusRot writeup.
+- Settings shows the safe angle, camera, and history. Recalibrate saves a new safe eye angle. Forget drops the saved angle. Camera shows whether the camera is allowed, and can ask Chrome to allow it. History can delete every saved session after you confirm.
+- Profile shows a name, a profile photo, and a favourite meme. The favourite meme is a display. It does not pick the meme for today's session. The name and photo open from the account menu.
+- There are sample memes, and you can add up to 20 of your own images. Before a session starts, you choose which one will bonk you. Adding your own image was brought in with the home-screen polish. Random choice, custom audio, and text-to-speech stay out.
 - The chosen meme bonks you when the border finishes turning red. It does not bonk the instant you look away. You already answered this. One distraction is counted then.
 - Stop shows "Session End," then a black fade, then the session analytics and a Finish button. Finish returns to the home page. The analytics are the three stats you already chose: session length, elapsed time, and distraction count.
 
@@ -126,15 +126,16 @@ You count one distraction when the meme comes out. The meme comes out when the b
 - A green-to-red border, a slow return to green if you come back in time, and a faster turn to red if you leave the chair.
 - A way to stop the session, pause it, and resume it with the play button.
 - "Session End," a black fade, the session analytics, and a Finish button back to the home page.
-- Settings with recalibrate and camera status.
-- A past session that shows session length, elapsed time, and distraction count, including zero.
-- Meme storage, so you can choose the bonk meme before a session starts.
+- Settings with the safe angle, camera status, and a way to clear saved sessions.
+- A past session that shows session length, elapsed time, and the Bonk count, including zero.
+- Home totals for Bonks, focus time, sessions, and a day streak.
+- Meme storage, including up to 20 of your own images, so you can choose the bonk meme before a session starts.
 - That chosen meme bonking you when the border finishes turning red.
 
 ## Deferred From the POC
 
-- Extra meme-vault tools from the original writeup: random meme, custom audio uploads, text-to-speech roasts, and a friend triggering the meme. This build has you choose one meme before the session, then that meme bonks you.
-- Extra session stats beyond session length, elapsed time, and distraction count.
+- Extra meme-vault tools from the original writeup: random meme, custom audio uploads, text-to-speech roasts, and a friend triggering the meme. This build lets you choose a sample meme or add your own image, then that meme bonks you.
+- Points and unlockable collectibles. A day streak, total Bonks, and total focus time are on the home page. They are sums of saved sessions, not a points system.
 - Past sessions as cards. For now, each past session is a line of text.
 - Slumping and any sitting-posture score. Removed, not saved as a later feature.
 
@@ -142,7 +143,7 @@ You count one distraction when the meme comes out. The meme comes out when the b
 
 - Meme intensity, sound, and the larger set of vault tools. From `scope.md > Later` and the original FocusRot writeup.
 - A friend taking a snapshot of your surprised face. From `scope.md > Later`.
-- Shared rooms, phone overlays, tab tracking, points, streaks, and collectibles. From `scope.md > Later`.
+- Shared rooms, phone overlays, tab tracking, points, and collectibles. From `scope.md > Later`. The day streak is already on the home page.
 
 ## Non-Goals
 

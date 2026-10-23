@@ -47,7 +47,10 @@ check("sustained looking away reaches full red", run(START_FOCUS, lookingAway, 1
 check("full red is left-work", focusState({ ...START_FOCUS, redness: 1 }) === "left-work");
 check("leaving the chair turns red faster", chairTime < awayTime, `${chairTime.toFixed(1)}s vs ${awayTime.toFixed(1)}s`);
 
-const blip = run(START_FOCUS, leftChair, 1);
+check("a look-away Bonk is about 25% faster than 8 seconds", awayTime <= 8 / 1.25 + 0.05 && awayTime > 6, `${awayTime.toFixed(2)}s`);
+check("leaving the screen without pausing is at least 50% faster than 5 seconds", chairTime <= 5 / 1.5 + 0.05, `${chairTime.toFixed(2)}s`);
+
+const blip = run(START_FOCUS, leftChair, 0.8);
 check("a short face blip does not count as leaving the chair", blip.redness === 0 && focusState(blip) === "on-work");
 check("face missing past the grace is left-chair", focusState(run(START_FOCUS, leftChair, 2)) === "left-chair");
 check("face coming back resets the grace", run(blip, onWork, FRAME).missingSeconds === 0);

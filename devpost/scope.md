@@ -44,7 +44,7 @@ If it is not needed to prove that catch, it is not in this proof.
 - Shared rooms, inviting friends, and collaboration.
 - A phone border and a floating circle while you are in another app. An Android phone can draw that overlay after you allow it. An iPhone cannot.
 - Tab and page tracking, and attention span as its own measure.
-- Points, streaks, and unlockable collectibles.
+- Points and unlockable collectibles. A day streak is on the home page now. It only counts days that already have a saved session.
 
 ## Explicitly Cut
 

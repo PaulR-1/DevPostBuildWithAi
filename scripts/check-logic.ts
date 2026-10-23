@@ -40,6 +40,13 @@ check("looking away is drifting before full red", focusState(away) === "drifting
 const back = run(away, onWork, 0.3);
 check("looking back turns green again", back.redness < away.redness, `${away.redness.toFixed(2)} -> ${back.redness.toFixed(2)}`);
 check("coming back in time reaches full green", run(away, onWork, 5).redness === 0);
+let fromRed = { ...START_FOCUS, redness: 1, bonked: true };
+let greenTime = 0;
+while (fromRed.redness > 0 && greenTime < 10) {
+  fromRed = stepFocus(fromRed, onWork, safe, FRAME);
+  greenTime += FRAME;
+}
+check("looking back is 25% faster than 3 seconds", greenTime < 2.5 && greenTime > 2.2, `${greenTime.toFixed(2)}s`);
 
 const awayTime = secondsUntilRed(lookingAway);
 const chairTime = secondsUntilRed(leftChair);

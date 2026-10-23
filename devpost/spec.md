@@ -99,7 +99,7 @@ PRD ref: `prd.md > Calibration`.
 
 ### Focus State
 
-Compares the live eye angle with the safe angle. A visible face inside the safe angle is on the work. Eyes off that angle turn the border red in about 6.4 seconds, then count one Bonk. No visible face and no visible body, for longer than 1 second, means left the chair: the border then reaches red in about 3.3 seconds total, without you pressing pause. A hidden face with your body still in view holds the border where it is. Looking back turns the border green again in about 3 seconds.
+Compares the live eye angle with the safe angle. A visible face inside the safe angle is on the work. Eyes off that angle turn the border red in about 6.4 seconds, then count one Bonk. No visible face and no visible body, for longer than 1 second, means left the chair: the border then reaches red in about 3.3 seconds total, without you pressing pause. A hidden face with your body still in view holds the border where it is. Looking back turns the border green again in about 2.4 seconds, the same 25% speedup as a look-away.
 
 PRD ref: `prd.md > On-work border`, `prd.md > Leaving the work`, `prd.md > Leaving the chair`.
 

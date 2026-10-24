@@ -1,0 +1,1270 @@
+{
+ "url": "http://127.0.0.1:5173/",
+ "at": "2026-10-23T23:31:23.564Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    1
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 900,
+     "screens": 1,
+     "words": 52,
+     "img": 6,
+     "video": 0,
+     "canvas": 0,
+     "svg": 2,
+     "sections": 3,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "FocusRot",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 32,
+     "vw": 2.2,
+     "font": "Bricolage Grotesque",
+     "weight": 700,
+     "tracking": -0.05,
+     "leading": 1,
+     "top": 41,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "FocusRot",
+     "words": 1,
+     "lines": 1,
+     "size": 31.7,
+     "font": "Bricolage Grotesque"
+    },
+    "headings": [
+     {
+      "text": "FocusRot",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 31.7,
+      "vw": 2.2,
+      "font": "Bricolage Grotesque",
+      "weight": 700,
+      "tracking": -0.055,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.09,
+      "top": 41,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "0",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 54.4,
+      "vw": 3.8,
+      "font": "Bricolage Grotesque",
+      "weight": 600,
+      "tracking": 0,
+      "leading": 0.85,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.15,
+      "top": 253,
+      "tag": "dd",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Bricolage Grotesque",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      22,
+      23,
+      26,
+      32,
+      54
+     ],
+     "sizeCount": 9,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 54.4,
+      "vw": 3.8,
+      "font": "Bricolage Grotesque",
+      "text": "0"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.14,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#ffffff",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 1
+     },
+     "dark": false,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#b9d7c4",
+       "share": 0.78
+      },
+      {
+       "color": "#eafff2",
+       "share": 0.18
+      },
+      {
+       "color": "#58f49d",
+       "share": 0.02
+      },
+      {
+       "color": "#052212",
+       "share": 0.02
+      }
+     ],
+     "button": {
+      "bg": "#58f49d",
+      "hsl": {
+       "h": 147,
+       "s": 0.88,
+       "l": 0.65
+      },
+      "fg": "#052212"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 1,
+     "inHero": 1,
+     "radius": "pill",
+     "height": 63,
+     "withShadow": 1,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Start"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 3,
+     "shadowOverlay": 0,
+     "shadowSamples": [
+      "button.account-button → rgba(0, 0, 0, 0.25) 0px 10px 24px 0px, rgba(234, 255, 240, 0.12) 0px 1px 0px 0px",
+      "img.home-launch-meme → rgba(0, 0, 0, 0.22) 0px 10px 22px 0px",
+      "button.meme-choice.meme-choice--chosen → rgba(183, 255, 211, 0.16) 0px 0px 0px 1px inset, rgba(65, 245, 138, 0.12) 0px 0p"
+     ],
+     "gradients": 5,
+     "scrims": 0,
+     "gradientSamples": [
+      "div#root → radial-gradient(circle at 14% 2%, rgba(53, 255, 132, 0.24), rgba(0, 0, 0, 0) 400px), radial-gradient(circle at",
+      "div.app → radial-gradient(circle at 50% -16%, rgba(75, 244, 142, 0.18), rgba(0, 0, 0, 0) 512px), radial-gradient(circle ",
+      "section.home-card.home-launch → linear-gradient(125deg, rgba(39, 117, 73, 0.76), rgba(7, 37, 21, 0.68))",
+      "section.home-card.home-card--memes → linear-gradient(125deg, rgba(34, 94, 60, 0.68), rgba(5, 28, 16, 0.58))"
+     ],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "div.home-focus 1071px"
+     ],
+     "outlinedBoxes": 3,
+     "dashed": 1,
+     "blurred": 4,
+     "roundedBoxes": 3,
+     "boxRadius": 22,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 900,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "bricolage grotesque"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 900,
+    "margins": {
+     "left": null,
+     "right": null
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "FocusRot",
+      "size": 32,
+      "top": 41,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.25,
+    "voidBox": {
+     "x": 360,
+     "y": 600,
+     "w": 1080,
+     "h": 300
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": false,
+    "ground": "#ffffff",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 166,
+     "right": 166
+    },
+    "hero": {
+     "text": "FocusRot",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 32,
+     "vw": 2.2,
+     "font": "Bricolage Grotesque",
+     "weight": 700,
+     "tracking": -0.05,
+     "leading": 1,
+     "top": 41,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 3,
+     "firstScreen": 3,
+     "ragged": [
+      {
+       "diff": 339,
+       "top": 341
+      }
+     ],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 4,
+     "radii": [
+      [
+       22,
+       3
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 3
+    },
+    "chips": {
+     "count": 1,
+     "hues": 1,
+     "samples": [
+      {
+       "hue": 148,
+       "size": 44,
+       "radius": "50%"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.13,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      22,
+      23,
+      26,
+      32
+     ]
+    },
+    "title": {
+     "text": "FocusRot",
+     "size": 32,
+     "top": 41
+    },
+    "colourShare": 0.108
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    1
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 1024,
+     "screens": 1,
+     "words": 52,
+     "img": 6,
+     "video": 0,
+     "canvas": 0,
+     "svg": 2,
+     "sections": 3,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "FocusRot",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 26,
+     "vw": 3.4,
+     "font": "Bricolage Grotesque",
+     "weight": 700,
+     "tracking": -0.05,
+     "leading": 1,
+     "top": 37,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "FocusRot",
+     "words": 1,
+     "lines": 1,
+     "size": 26.4,
+     "font": "Bricolage Grotesque"
+    },
+    "headings": [
+     {
+      "text": "FocusRot",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 26.4,
+      "vw": 3.4,
+      "font": "Bricolage Grotesque",
+      "weight": 700,
+      "tracking": -0.055,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.14,
+      "top": 37,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "0",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 41.6,
+      "vw": 5.4,
+      "font": "Bricolage Grotesque",
+      "weight": 600,
+      "tracking": 0,
+      "leading": 0.85,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.17,
+      "top": 234,
+      "tag": "dd",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Bricolage Grotesque",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      20,
+      26,
+      42
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 41.6,
+      "vw": 5.4,
+      "font": "Bricolage Grotesque",
+      "text": "0"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.14,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#ffffff",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 1
+     },
+     "dark": false,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#b9d7c4",
+       "share": 0.78
+      },
+      {
+       "color": "#eafff2",
+       "share": 0.18
+      },
+      {
+       "color": "#58f49d",
+       "share": 0.02
+      },
+      {
+       "color": "#052212",
+       "share": 0.02
+      }
+     ],
+     "button": {
+      "bg": "#58f49d",
+      "hsl": {
+       "h": 147,
+       "s": 0.88,
+       "l": 0.65
+      },
+      "fg": "#052212"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 1,
+     "inHero": 1,
+     "radius": "pill",
+     "height": 59,
+     "withShadow": 1,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Start"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 3,
+     "shadowOverlay": 0,
+     "shadowSamples": [
+      "button.account-button → rgba(0, 0, 0, 0.25) 0px 10px 24px 0px, rgba(234, 255, 240, 0.12) 0px 1px 0px 0px",
+      "img.home-launch-meme → rgba(0, 0, 0, 0.22) 0px 10px 22px 0px",
+      "button.meme-choice.meme-choice--chosen → rgba(183, 255, 211, 0.16) 0px 0px 0px 1px inset, rgba(65, 245, 138, 0.12) 0px 0p"
+     ],
+     "gradients": 5,
+     "scrims": 0,
+     "gradientSamples": [
+      "div#root → radial-gradient(circle at 14% 2%, rgba(53, 255, 132, 0.24), rgba(0, 0, 0, 0) 400px), radial-gradient(circle at",
+      "div.app → radial-gradient(circle at 50% -16%, rgba(75, 244, 142, 0.18), rgba(0, 0, 0, 0) 512px), radial-gradient(circle ",
+      "section.home-card.home-launch → linear-gradient(125deg, rgba(39, 117, 73, 0.76), rgba(7, 37, 21, 0.68))",
+      "section.home-card.home-card--memes → linear-gradient(125deg, rgba(34, 94, 60, 0.68), rgba(5, 28, 16, 0.58))"
+     ],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "div.home-focus 686px"
+     ],
+     "outlinedBoxes": 3,
+     "dashed": 1,
+     "blurred": 4,
+     "roundedBoxes": 3,
+     "boxRadius": 22,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 1024,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "bricolage grotesque"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 1024,
+    "margins": {
+     "left": null,
+     "right": null
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "FocusRot",
+      "size": 26,
+      "top": 37,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": false,
+    "ground": "#ffffff",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 27,
+     "right": 27
+    },
+    "hero": {
+     "text": "FocusRot",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 26,
+     "vw": 3.4,
+     "font": "Bricolage Grotesque",
+     "weight": 700,
+     "tracking": -0.05,
+     "leading": 1,
+     "top": 37,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 3,
+     "firstScreen": 3,
+     "ragged": [
+      {
+       "diff": 213,
+       "top": 301
+      }
+     ],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 3,
+     "radii": [
+      [
+       22,
+       3
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 3
+    },
+    "chips": {
+     "count": 1,
+     "hues": 1,
+     "samples": [
+      {
+       "hue": 148,
+       "size": 44,
+       "radius": "50%"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.13,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      20,
+      26
+     ]
+    },
+    "title": {
+     "text": "FocusRot",
+     "size": 26,
+     "top": 37
+    },
+    "colourShare": 0.105
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    1
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 844,
+     "screens": 1,
+     "words": 52,
+     "img": 6,
+     "video": 0,
+     "canvas": 0,
+     "svg": 2,
+     "sections": 3,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "FocusRot",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 26,
+     "vw": 6.8,
+     "font": "Bricolage Grotesque",
+     "weight": 700,
+     "tracking": -0.05,
+     "leading": 1,
+     "top": 34,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "FocusRot",
+     "words": 1,
+     "lines": 1,
+     "size": 26.4,
+     "font": "Bricolage Grotesque"
+    },
+    "headings": [
+     {
+      "text": "FocusRot",
+      "words": 1,
+      "chars": 8,
+      "lines": 1,
+      "size": 26.4,
+      "vw": 6.8,
+      "font": "Bricolage Grotesque",
+      "weight": 700,
+      "tracking": -0.055,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.28,
+      "top": 34,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "0",
+      "words": 1,
+      "chars": 1,
+      "lines": 1,
+      "size": 41.6,
+      "vw": 10.7,
+      "font": "Bricolage Grotesque",
+      "weight": 600,
+      "tracking": 0,
+      "leading": 0.85,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.83,
+      "top": 281,
+      "tag": "dd",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 1,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Bricolage Grotesque",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      20,
+      26,
+      42
+     ],
+     "sizeCount": 8,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 41.6,
+      "vw": 10.7,
+      "font": "Bricolage Grotesque",
+      "text": "0"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.14,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#ffffff",
+     "bodyBgHsl": {
+      "h": 0,
+      "s": 0,
+      "l": 1
+     },
+     "dark": false,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#b9d7c4",
+       "share": 0.78
+      },
+      {
+       "color": "#eafff2",
+       "share": 0.18
+      },
+      {
+       "color": "#58f49d",
+       "share": 0.02
+      },
+      {
+       "color": "#052212",
+       "share": 0.02
+      }
+     ],
+     "button": {
+      "bg": "#58f49d",
+      "hsl": {
+       "h": 147,
+       "s": 0.88,
+       "l": 0.65
+      },
+      "fg": "#052212"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 1,
+     "inHero": 1,
+     "radius": "pill",
+     "height": 55,
+     "withShadow": 1,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Start"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 3,
+     "shadowOverlay": 0,
+     "shadowSamples": [
+      "button.account-button → rgba(0, 0, 0, 0.25) 0px 10px 24px 0px, rgba(234, 255, 240, 0.12) 0px 1px 0px 0px",
+      "img.home-launch-meme → rgba(0, 0, 0, 0.22) 0px 10px 22px 0px",
+      "button.meme-choice.meme-choice--chosen → rgba(183, 255, 211, 0.16) 0px 0px 0px 1px inset, rgba(65, 245, 138, 0.12) 0px 0p"
+     ],
+     "gradients": 5,
+     "scrims": 0,
+     "gradientSamples": [
+      "div#root → radial-gradient(circle at 14% 2%, rgba(53, 255, 132, 0.24), rgba(0, 0, 0, 0) 400px), radial-gradient(circle at",
+      "div.app → radial-gradient(circle at 50% -16%, rgba(75, 244, 142, 0.18), rgba(0, 0, 0, 0) 512px), radial-gradient(circle ",
+      "section.home-card.home-launch → linear-gradient(125deg, rgba(39, 117, 73, 0.76), rgba(7, 37, 21, 0.68))",
+      "section.home-card.home-card--memes → linear-gradient(125deg, rgba(34, 94, 60, 0.68), rgba(5, 28, 16, 0.58))"
+     ],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "div.home-focus 324px"
+     ],
+     "outlinedBoxes": 3,
+     "dashed": 1,
+     "blurred": 4,
+     "roundedBoxes": 8,
+     "boxRadius": 14,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 844,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "bricolage grotesque"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 844,
+    "margins": {
+     "left": null,
+     "right": null
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "FocusRot",
+      "size": 26,
+      "top": 34,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": false,
+    "ground": "#ffffff",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 20,
+     "right": 20
+    },
+    "hero": {
+     "text": "FocusRot",
+     "words": 1,
+     "chars": 8,
+     "lines": 1,
+     "size": 26,
+     "vw": 6.8,
+     "font": "Bricolage Grotesque",
+     "weight": 700,
+     "tracking": -0.05,
+     "leading": 1,
+     "top": 34,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 3,
+     "firstScreen": 3,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 9,
+     "radii": [
+      [
+       14,
+       5
+      ],
+      [
+       18,
+       3
+      ],
+      [
+       0,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 1,
+     "softShadows": 0,
+     "shadowSamples": [
+      "rgba(65, 245, 138, 0.12) 0px 0px 24px 0px"
+     ],
+     "glass": 3
+    },
+    "chips": {
+     "count": 1,
+     "hues": 1,
+     "samples": [
+      {
+       "hue": 148,
+       "size": 44,
+       "radius": "50%"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.13,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      20,
+      26
+     ]
+    },
+    "title": {
+     "text": "FocusRot",
+     "size": 26,
+     "top": 34
+    },
+    "colourShare": 0.349
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "width": 1440,
+   "message": "5 gradient fill(s): div#root → radial-gradient(circle at 14% 2%, rgba(53, 255, 132, 0.24), rgba(0, 0, 0, 0) 400px), radial-gradient(circle at | div.app → radial-gradient(circle at 50% -16%, rgba(75, 244, 142, 0.18), rgba(0, 0, 0, 0) 512px), radial-gradient(circle  | section.home-card.home-launch → linear-gradient(125deg, rgba(39, 117, 73, 0.76), rgba(7, 37, 21, 0.68))",
+   "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "button-fx",
+   "width": 1440,
+   "message": "Buttons with shadow/glow.",
+   "fix": "Flat fill, one colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "ragged-row",
+   "width": 1440,
+   "message": "1 pair(s) of cards in one row end at different heights (by 339px).",
+   "fix": "Cards that share a row share a bottom edge: balance them by their content (the same number of rows, a block of similar height beside it), or stack them. In testing, ragged rows were marked down every time.",
+   "alsoAt": [
+    768
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "heavy-shadow",
+   "width": 390,
+   "message": "1 panel shadow(s) heavy enough to read as floating: rgba(65, 245, 138, 0.12) 0px 0px 24px 0px",
+   "fix": "Panels sit on the ground: separate them with a fill one step from the ground or a quiet 1px border. A shadow, if any, is under 8% black with a small blur. Real overlays (menus, dialogs, popovers) may float."
+  },
+  {
+   "level": "WARN",
+   "id": "colour-sprawl",
+   "width": 390,
+   "message": "35% of the first screen is strongly coloured.",
+   "fix": "Keep the screen neutral and spend colour on data and status: the studied screens sit near 3%, and only tinted styles reach 10–15%, as pale tints rather than saturated fills."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "C:\\Codes\\DevPostBuildWithAi\\.taste-skill\\after-final\\desktop-fold.jpg",
+   "pages": [
+    "C:\\Codes\\DevPostBuildWithAi\\.taste-skill\\after-final\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "C:\\Codes\\DevPostBuildWithAi\\.taste-skill\\after-final\\tablet-fold.jpg",
+   "pages": [
+    "C:\\Codes\\DevPostBuildWithAi\\.taste-skill\\after-final\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "C:\\Codes\\DevPostBuildWithAi\\.taste-skill\\after-final\\mobile-fold.jpg",
+   "pages": [
+    "C:\\Codes\\DevPostBuildWithAi\\.taste-skill\\after-final\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

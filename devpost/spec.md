@@ -25,7 +25,7 @@ PRD ref: `prd.md > The Core Journey`.
 4. You press start. If the camera is blocked or your face cannot be seen, the page tells you to unblock the camera and show your face. "Session Start!" waits.
 5. Calibration asks you to look at your laptop, phone, or notebook. MediaPipe reads your eye angle. IndexedDB saves it as the safe angle.
 6. The page shows "Session Start!" on a black fade, then your camera and the app-icon bubble. The border starts as a green haze.
-7. On each camera frame, MediaPipe reports your eyes and whether your face is visible. The page moves the border from green toward red when your eyes leave the safe angle. Looking back moves it toward green. Your face leaving the camera moves it toward red faster.
+7. On each camera frame, MediaPipe reports your eyes and whether your face is visible. The page moves the border from green toward red when your eyes leave the safe angle. Looking back moves it toward green. Your face leaving the camera moves it toward red faster. The meme cannot appear again until 3 seconds after it pops.
 8. When the border finishes turning red, the chosen meme appears and the distraction count increases by one.
 9. Pause shows "Session Pause" and stops the session clock. Play resumes it. Paused time stays out of session length and stays inside elapsed time.
 10. Stop shows "Session End", fades through black, and shows session length, elapsed time, and the distraction count. Finish writes that session to IndexedDB and returns to the home page.
@@ -99,7 +99,7 @@ PRD ref: `prd.md > Calibration`.
 
 ### Focus State
 
-Compares the live eye angle with the safe angle. A visible face inside the safe angle is on the work. Eyes off that angle turn the border red in about 6.4 seconds, then count one Bonk. No visible face and no visible body, for longer than 1 second, means left the chair: the border then reaches red in about 3.3 seconds total, without you pressing pause. A hidden face with your body still in view holds the border where it is. Looking back turns the border green again in about 2.4 seconds, the same 25% speedup as a look-away.
+Compares the live eye angle with the safe angle. A visible face inside the safe angle is on the work. Eyes off that angle turn the border red in about 6.4 seconds, then count one Bonk. The meme stays hidden for 3 seconds after it appears, so a wobble cannot pop it again. No visible face and no visible body, for longer than 1 second, means left the chair: the border then reaches red in about 3.3 seconds total, without you pressing pause. A hidden face with your body still in view holds the border where it is. Looking back turns the border green again in about 2.4 seconds, the same 25% speedup as a look-away.
 
 PRD ref: `prd.md > On-work border`, `prd.md > Leaving the work`, `prd.md > Leaving the chair`.
 
@@ -111,7 +111,7 @@ PRD ref: `prd.md > Session controls`.
 
 ### Meme Bonk
 
-Shows the chosen meme when the border finishes turning red, and adds one Bonk. The count is labeled Bonks on the results screen and on the home page.
+Shows the chosen meme when the border finishes turning red, and adds one Bonk. A new pop waits 3 seconds from the moment the meme appeared. The count is labeled Bonks on the results screen and on the home page. The count still waits until you are fully back on a safe color before it can go up again.
 
 PRD ref: `prd.md > Leaving the work`.
 
@@ -127,7 +127,7 @@ All of this lives in IndexedDB in Chrome on this laptop.
 
 - **Profile:** name, photo, and favourite meme.
 - **Meme library:** four sample images in the project, plus up to 20 images you add. Your chosen bonk meme is saved separately.
-- **Calibration:** the safe eye angle. Settings can delete it.
+- **Calibration:** the safe eye angle. A list saved during the short multi-spot try is read as its first angle. Settings can delete it.
 - **Current session:** running, paused, or ended; start time; paused time; Bonk count; chosen meme.
 - **Past sessions:** session length, elapsed time, and Bonk count. The home page lists each line and sums them into Bonks, focus time, session count, and the day streak.
 

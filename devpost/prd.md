@@ -17,7 +17,7 @@ Source: `scope.md > The Core Loop`, `scope.md > What "Working" Looks Like`, `sco
 4. The screen shows "Session Start!" on a black faded background. The words fade out.
 5. You see yourself on the camera. A small bubble, the app icon, sits on the screen. A faded green border, like a slight haze, sits around the edges. That green border means you are on the work.
 6. If your eyes leave the safe angle, the green border slowly turns red. If you look back at your laptop, phone, or notebook before it becomes fully red, the border slowly becomes green again.
-7. If you keep looking away, the border finishes turning red. The meme you chose pops up and bonks you. That moment counts as one distraction.
+7. If you keep looking away, the border finishes turning red. The meme you chose pops up and bonks you. That moment counts as one distraction. The meme cannot pop again until 3 seconds have passed.
 8. If you leave your chair, the border turns red faster than it does when your eyes look away.
 9. You can click the app icon to stop the session, pause the session, or open settings.
 10. When you stop, the session ends. The screen shows "Session End," like "Session Start!" Then the screen fades through black.
@@ -59,7 +59,7 @@ Your eyes leave the safe angle. The border slowly turns from green to red. It do
 
 You look back before the border is fully red. The border becomes green again in about 2.4 seconds from full red. That is 25% faster than the earlier 3 seconds, the same speedup as a look-away.
 
-You do not look back. The border finishes turning red in about 6.4 seconds. That is 25% faster than the earlier 8 seconds, so the Bonk count goes up sooner. The meme you chose before the session pops up and bonks you. That counts as one Bonk. The meme does not appear the instant you look away. `scope.md > Explicitly Cut` gives you a chance to come back first.
+You do not look back. The border finishes turning red in about 6.4 seconds. That is 25% faster than the earlier 8 seconds, so the Bonk count goes up sooner. The meme you chose before the session pops up and bonks you. That counts as one Bonk. The meme does not appear the instant you look away, and it cannot pop again until 3 seconds have passed. `scope.md > Explicitly Cut` gives you a chance to come back first.
 
 ### Leaving the chair
 
@@ -160,7 +160,7 @@ You count one Bonk when the meme comes out. The meme comes out when the border f
 - [ ] You look at your laptop, phone, or notebook. FocusRot saves that eye angle. "Session Start!" appears on a black faded background and then fades out.
 - [ ] On the work, a faded green haze sits around the screen.
 - [ ] If you look away, the haze turns red slowly. If you look back before it is fully red, it turns green slowly. No meme appears during that change.
-- [ ] If you do not come back, the border finishes turning red, the chosen meme bonks you, and the distraction count goes up by one.
+- [ ] If you do not come back, the border finishes turning red, the chosen meme bonks you, and the distraction count goes up by one. The meme waits 3 seconds before it can pop again.
 - [ ] If you leave your chair, the border turns red faster than a look away.
 - [ ] Pause shows "Session Pause" until you press play. Paused time is left out of session length and included in elapsed time.
 - [ ] Stop shows "Session End," fades through black, then shows session length, elapsed time, and the distraction count. Finish returns to the home page, and the session appears as a line of text.

@@ -12,7 +12,7 @@ import { elapsedMs, endClock, pauseClock, resumeClock, sessionLengthMs, startClo
 import { addSession, deleteSetting, getSetting, setSetting, type PastSession } from "./storage/focusDb";
 import type { ProfileData } from "./screens/Profile";
 import type { Reading } from "./tracking/faceTracking";
-import { START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
+import { angleFromStored, START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
 import { useTracking } from "./tracking/useTracking";
 
 type Phase =
@@ -64,7 +64,12 @@ export default function App() {
       if (!Array.isArray(saved)) return;
       setCustomMemes(saved.filter((meme) => meme && typeof meme.id === "string" && typeof meme.name === "string" && typeof meme.src === "string"));
     });
-    getSetting<Angle>("calibration").then((a) => a && setSavedAngle(a));
+    getSetting<unknown>("calibration").then((saved) => {
+      const angle = angleFromStored(saved);
+      if (!angle) return;
+      setSavedAngle(angle);
+      safeRef.current = angle;
+    });
   }, []);
 
   /** Rejects when the browser refuses to store it, so the meme never shows without being saved. */
@@ -142,6 +147,8 @@ export default function App() {
     if (phase === "running") {
       setSettingsOpen(false);
       setPhase("recalibrating-session");
+    } else {
+      safeRef.current = null;
     }
   };
 

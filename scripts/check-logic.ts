@@ -1,5 +1,5 @@
 import { elapsedMs, endClock, formatDuration, pauseClock, resumeClock, sessionLengthMs, startClock } from "../src/sessionClock.ts";
-import { focusState, showMeme, START_FOCUS, stepFocus, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
+import { angleFromStored, focusState, showMeme, START_FOCUS, stepFocus, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
 
 const safe = { yaw: 0, pitch: -10 };
 const onWork = { faceVisible: true, bodyVisible: true, yaw: 3, pitch: -8 };
@@ -76,6 +76,32 @@ const second = run(run(bonk, onWork, 5), lookingAway, 10);
 check("coming back fully then looking away again counts a second", second.distractions === 2, `${second.distractions}`);
 check("meme hides once you look back", !showMeme(run(bonk, onWork, 0.1)));
 check("leaving the chair counts as a distraction too", run(START_FOCUS, leftChair, 10).distractions === 1);
+
+const yawEdge = { faceVisible: true, bodyVisible: true, yaw: safe.yaw + 15, pitch: safe.pitch };
+const yawPast = { ...yawEdge, yaw: safe.yaw + 16 };
+check("15 degrees left or right still counts as on the work", run(START_FOCUS, yawEdge, 2).redness === 0);
+check("past 15 degrees starts turning red", run(START_FOCUS, yawPast, 1).redness > 0);
+const pitchEdge = { faceVisible: true, bodyVisible: true, yaw: safe.yaw, pitch: safe.pitch + 12 };
+const pitchPast = { ...pitchEdge, pitch: safe.pitch + 13 };
+check("12 degrees up or down still counts as on the work", run(START_FOCUS, pitchEdge, 2).redness === 0);
+check("past 12 degrees starts turning red", run(START_FOCUS, pitchPast, 1).redness > 0);
+
+let shown = START_FOCUS;
+let shownFor = 0;
+while (!showMeme(shown) && shownFor < 20) {
+  shown = stepFocus(shown, lookingAway, safe, FRAME);
+  shownFor += FRAME;
+}
+const hid = run(shown, onWork, 0.1);
+const flashed = run(hid, lookingAway, 1);
+check("the meme stays hidden for 3 seconds after it appears", showMeme(shown) && !showMeme(hid) && flashed.redness >= 1 && !showMeme(flashed));
+const afterGap = run(flashed, lookingAway, 3);
+check("the meme can pop again after the 3 second gap", showMeme(afterGap) && afterGap.distractions === 1);
+
+const storedSingle = angleFromStored({ yaw: 4, pitch: 5 });
+const storedList = angleFromStored([{ yaw: 1, pitch: 2 }, { yaw: 8, pitch: 9 }]);
+check("a saved angle loads as one angle", storedSingle?.yaw === 4);
+check("a stored list keeps its first angle", storedList?.yaw === 1);
 
 let clock = startClock(0);
 clock = pauseClock(clock, 60_000);

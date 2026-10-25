@@ -13,7 +13,7 @@ import { elapsedMs, endClock, pauseClock, resumeClock, sessionLengthMs, startClo
 import { addSession, deleteSetting, getSetting, setSetting, type PastSession } from "./storage/focusDb";
 import type { ProfileData } from "./screens/Profile";
 import type { Reading } from "./tracking/faceTracking";
-import { angleFromStored, borderHue, START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
+import { anglesFromStored, SAFE_COLORS, START_FOCUS, stepFocus, type Angle, type Focus, type Rgb } from "./tracking/focusState";
 import { useTracking } from "./tracking/useTracking";
 import { playClick, playDrop, setAmbientVolume, setMemeVolume } from "./uiSound";
 
@@ -51,14 +51,15 @@ export default function App() {
   const [chosenMemeId, setChosenMemeId] = useState(SAMPLE_MEMES[0].id);
   const [customMemes, setCustomMemes] = useState<Meme[]>([]);
   const memes = [...SAMPLE_MEMES, ...customMemes];
-  const [savedAngle, setSavedAngle] = useState<Angle | null>(null);
+  const [savedAngles, setSavedAngles] = useState<Angle[]>([]);
+  const [captureIndex, setCaptureIndex] = useState(0);
   const [memeVolume, setMemeVolumeState] = useState(1);
   const [ambientVolume, setAmbientVolumeState] = useState(1);
 
   const trackingFocus = phase === "running" && !settingsOpen;
   const trackingFocusRef = useRef(trackingFocus);
   trackingFocusRef.current = trackingFocus;
-  const safeRef = useRef<Angle | null>(null);
+  const safeRef = useRef<Angle[]>([]);
   const focusRef = useRef<Focus>(START_FOCUS);
   const clockRef = useRef<Clock | null>(null);
 
@@ -72,10 +73,10 @@ export default function App() {
       }));
     });
     getSetting<unknown>("calibration").then((saved) => {
-      const angle = angleFromStored(saved);
-      if (!angle) return;
-      setSavedAngle(angle);
-      safeRef.current = angle;
+      const angles = anglesFromStored(saved);
+      if (angles.length === 0) return;
+      setSavedAngles(angles);
+      safeRef.current = angles;
     });
     getSetting<number>("memeVolume").then((saved) => {
       if (typeof saved !== "number") return;
@@ -131,7 +132,7 @@ export default function App() {
   };
 
   const onReading = useCallback((reading: Reading, seconds: number) => {
-    if (!trackingFocusRef.current || !safeRef.current) return;
+    if (!trackingFocusRef.current || safeRef.current.length === 0) return;
     focusRef.current = stepFocus(focusRef.current, reading, safeRef.current, seconds);
     setFocus(focusRef.current);
   }, []);
@@ -139,45 +140,50 @@ export default function App() {
   const cameraOn = CAMERA_PHASES.includes(phase);
   const { status, reading } = useTracking(videoRef, cameraOn, onReading);
 
-  const saveAngle = (safe: Angle) => {
-    safeRef.current = safe;
-    setSavedAngle(safe);
-    setSetting("calibration", safe);
+  const saveAngles = (safes: Angle[]) => {
+    const next = safes.slice(0, 3);
+    safeRef.current = next;
+    setSavedAngles(next);
+    setSetting("calibration", next);
   };
 
-  const onCalibrated = (safe: Angle) => {
-    saveAngle(safe);
+  const onCalibrated = (safes: Angle[]) => {
+    saveAngles(safes);
     focusRef.current = START_FOCUS;
     setFocus(START_FOCUS);
+    setCaptureIndex(0);
     setPhase("starting");
   };
 
-  const onRecalibratedHome = (safe: Angle) => {
-    saveAngle(safe);
+  const onRecalibratedHome = (safes: Angle[]) => {
+    saveAngles(safes);
+    setCaptureIndex(0);
     setPhase("home");
   };
 
-  const onRecalibratedSession = (safe: Angle) => {
-    saveAngle(safe);
+  const onRecalibratedSession = (safes: Angle[]) => {
+    saveAngles(safes);
     focusRef.current = { ...START_FOCUS, distractions: focusRef.current.distractions };
     setFocus(focusRef.current);
+    setCaptureIndex(0);
     setPhase("running");
   };
 
   const recalibrate = () => {
+    setCaptureIndex(0);
     setSettingsOpen(false);
     setPhase(phase === "home" ? "recalibrating-home" : "recalibrating-session");
   };
 
   const forgetCalibration = () => {
-    // Keep the live angle so the border does not freeze if they cancel the new calibrate.
-    setSavedAngle(null);
+    // Keep the live angles so the border does not freeze if they cancel the new calibrate.
+    setSavedAngles([]);
     deleteSetting("calibration").catch(() => {});
     if (phase === "running") {
       setSettingsOpen(false);
       setPhase("recalibrating-session");
     } else {
-      safeRef.current = null;
+      safeRef.current = [];
     }
   };
 
@@ -228,20 +234,26 @@ export default function App() {
     setPhase("results");
   };
 
+  const faceColor = (): Rgb => {
+    if (phase === "running" || phase === "paused") return focus.border;
+    const capturing = phase === "calibrating" || phase === "recalibrating-home" || phase === "recalibrating-session";
+    if (capturing) return SAFE_COLORS[Math.min(SAFE_COLORS.length - 1, captureIndex)];
+    return SAFE_COLORS[0];
+  };
+
   return (
     <div className="app">
       {cameraOn && <video ref={videoRef} className="camera" playsInline muted />}
       {cameraOn && reading?.faceBox && (
-        <FaceSquare
-          videoRef={videoRef}
-          box={reading.faceBox}
-          hue={borderHue(phase === "running" || phase === "paused" ? focus.redness : 0)}
-        />
+        <FaceSquare videoRef={videoRef} box={reading.faceBox} color={faceColor()} />
       )}
 
       {phase === "home" && (
         <Home
-          onStart={() => setPhase("calibrating")}
+          onStart={() => {
+            setCaptureIndex(0);
+            setPhase("calibrating");
+          }}
           memes={memes}
           chosenMemeId={chosenMemeId}
           onChooseMeme={chooseMeme}
@@ -253,16 +265,29 @@ export default function App() {
         />
       )}
       {phase === "calibrating" && (
-        <Calibration status={status} reading={reading} onCalibrated={onCalibrated} onCancel={() => setPhase("home")} />
+        <Calibration
+          status={status}
+          reading={reading}
+          onCalibrated={onCalibrated}
+          onCapturing={setCaptureIndex}
+          onCancel={() => setPhase("home")}
+        />
       )}
       {phase === "recalibrating-home" && (
-        <Calibration status={status} reading={reading} onCalibrated={onRecalibratedHome} onCancel={() => setPhase("home")} />
+        <Calibration
+          status={status}
+          reading={reading}
+          onCalibrated={onRecalibratedHome}
+          onCapturing={setCaptureIndex}
+          onCancel={() => setPhase("home")}
+        />
       )}
       {phase === "recalibrating-session" && (
         <Calibration
           status={status}
           reading={reading}
           onCalibrated={onRecalibratedSession}
+          onCapturing={setCaptureIndex}
           onCancel={() => setPhase("running")}
         />
       )}
@@ -284,7 +309,8 @@ export default function App() {
 
       {settingsPresence.mounted && (
         <Settings
-          hasCalibration={savedAngle !== null}
+          hasCalibration={savedAngles.length > 0}
+          angleCount={savedAngles.length}
           showRecalibrate={phase === "running" || phase === "paused"}
           memeVolume={memeVolume}
           ambientVolume={ambientVolume}

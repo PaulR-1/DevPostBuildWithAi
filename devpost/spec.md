@@ -23,9 +23,9 @@ PRD ref: `prd.md > The Core Journey`.
 2. The home screen reads IndexedDB. It shows your profile, settings, meme storage, past sessions, and start. If there is no past session, it shows "Nothing here yet" and a hint to press start.
 3. You choose a meme in meme storage. That choice is saved in IndexedDB.
 4. You press start. If the camera is blocked or your face cannot be seen, the page tells you to unblock the camera and show your face. "Session Start!" waits.
-5. Calibration asks you to look at your laptop, phone, or notebook. MediaPipe reads your eye angle. IndexedDB saves it as the safe angle.
+5. Calibration asks whether to save more than one angle. No is one look at the laptop, phone, or notebook. Yes lets you add spots until done, up to three. MediaPipe reads each eye angle. IndexedDB saves the list. An older single angle loads as a one-item list.
 6. The page shows "Session Start!" on a black fade, then your camera and the app-icon bubble. The border starts as a green haze.
-7. On each camera frame, MediaPipe reports your eyes and whether your face is visible. The page moves the border from green toward red when your eyes leave the safe angle. Looking back moves it toward green. Your face leaving the camera moves it toward red faster. The meme cannot appear again until 3 seconds after it pops.
+7. On each camera frame, MediaPipe reports your eyes and whether your face is visible. You are on the work inside the 15 degree by 12 degree box of any saved spot. The border and the face square use that spot's color, green then blue then violet, and mix it toward red when you leave every spot. Looking back moves it toward the spot color. Your face leaving the camera moves it toward red faster. The meme cannot appear again until 3 seconds after it pops.
 8. When the border finishes turning red, the chosen meme appears and the distraction count increases by one.
 9. Pause shows "Session Pause" and stops the session clock. Play resumes it. Paused time stays out of session length and stays inside elapsed time.
 10. Stop shows "Session End", fades through black, and shows session length, elapsed time, and the distraction count. Finish writes that session to IndexedDB and returns to the home page.

@@ -23,7 +23,14 @@ export type Focus = {
   memeVisible: boolean;
   /** Seconds left before the meme may appear again. Counts down from the moment it appears. */
   memeGap: number;
+  /** Which saved spot the border is coloring. Stays put while you drift, so red grows out of that color. */
+  activeIndex: number;
+  /** The haze on screen, already eased toward the spot color mixed with red. */
+  border: Rgb;
 };
+
+/** 0–255 channels. Kept as floats so the border can ease. */
+export type Rgb = { r: number; g: number; b: number };
 
 export const FOCUS_SETTINGS = {
   /** Degrees left/right of the safe angle that still count as on the work. */
@@ -42,7 +49,25 @@ export const FOCUS_SETTINGS = {
   smoothing: 0.25,
   /** After the meme appears, it cannot appear again until this many seconds have passed. */
   memeGapSeconds: 3,
+  /** A spot switch is mostly finished in this many seconds. */
+  colorFadeSeconds: 0.6,
 };
+
+export const MAX_SAVED_ANGLES = 3;
+
+function hsl(h: number, s: number, l: number): Rgb {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const hp = h / 60;
+  const x = c * (1 - Math.abs((hp % 2) - 1));
+  const m = l - c / 2;
+  const [r, g, b] =
+    hp < 1 ? [c, x, 0] : hp < 2 ? [x, c, 0] : hp < 3 ? [0, c, x] : hp < 4 ? [0, x, c] : hp < 5 ? [x, 0, c] : [c, 0, x];
+  return { r: (r + m) * 255, g: (g + m) * 255, b: (b + m) * 255 };
+}
+
+/** First saved spot, second, third. Mixed with red as a look-away gets worse. */
+export const SAFE_COLORS: readonly Rgb[] = [hsl(130, 0.92, 0.52), hsl(220, 0.92, 0.52), hsl(280, 0.92, 0.52)];
+export const BORDER_RED: Rgb = hsl(0, 0.92, 0.52);
 
 export const START_FOCUS: Focus = {
   redness: 0,
@@ -52,6 +77,8 @@ export const START_FOCUS: Focus = {
   distractions: 0,
   memeVisible: false,
   memeGap: 0,
+  activeIndex: 0,
+  border: SAFE_COLORS[0],
 };
 
 export function averageAngle(angles: Angle[]): Angle {
@@ -75,30 +102,91 @@ export function isOnAngle(angle: Angle, safe: Angle): boolean {
   );
 }
 
+/** The saved spot you are inside, preferring the closest when two overlap. */
+export function matchedAngleIndex(angle: Angle, safes: Angle[]): number | null {
+  let best: number | null = null;
+  let bestDist = Infinity;
+  for (let i = 0; i < safes.length; i++) {
+    const spot = safes[i];
+    if (!isOnAngle(angle, spot)) continue;
+    const dist =
+      ((angle.yaw - spot.yaw) / FOCUS_SETTINGS.yawTolerance) ** 2 +
+      ((angle.pitch - spot.pitch) / FOCUS_SETTINGS.pitchTolerance) ** 2;
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = i;
+    }
+  }
+  return best;
+}
+
 function isAngle(value: unknown): value is Angle {
   if (!value || typeof value !== "object") return false;
   const angle = value as Angle;
   return Number.isFinite(angle.yaw) && Number.isFinite(angle.pitch);
 }
 
-/** One saved angle. A list left by the short multi-spot experiment keeps its first angle. */
-export function angleFromStored(value: unknown): Angle | null {
-  if (Array.isArray(value)) return value.find(isAngle) ?? null;
-  return isAngle(value) ? value : null;
+/** IndexedDB may hold one angle from before lists existed. */
+export function anglesFromStored(value: unknown): Angle[] {
+  if (Array.isArray(value)) return value.filter(isAngle).slice(0, MAX_SAVED_ANGLES);
+  if (isAngle(value)) return [value];
+  return [];
 }
 
-/** Moves the focus forward by one frame lasting `seconds`. */
-export function stepFocus(focus: Focus, reading: FocusReading, safe: Angle, seconds: number): Focus {
+/** The first saved angle, when a caller still wants one. */
+export function angleFromStored(value: unknown): Angle | null {
+  return anglesFromStored(value)[0] ?? null;
+}
+
+function mixRgb(from: Rgb, to: Rgb, t: number): Rgb {
+  return { r: from.r + (to.r - from.r) * t, g: from.g + (to.g - from.g) * t, b: from.b + (to.b - from.b) * t };
+}
+
+function easeRgb(from: Rgb, to: Rgb, seconds: number): Rgb {
+  const tau = FOCUS_SETTINGS.colorFadeSeconds / 3;
+  return mixRgb(from, to, 1 - Math.exp(-seconds / tau));
+}
+
+function safeColor(index: number): Rgb {
+  return SAFE_COLORS[Math.min(SAFE_COLORS.length - 1, Math.max(0, index))];
+}
+
+function channel(n: number): number {
+  return Math.round(Math.min(255, Math.max(0, n)));
+}
+
+export function rgba(color: Rgb, alpha: number): string {
+  return `rgba(${channel(color.r)}, ${channel(color.g)}, ${channel(color.b)}, ${alpha})`;
+}
+
+/** Haze plus a lighter edge, in the eased color. */
+export function borderShadow(color: Rgb): string {
+  const edge = mixRgb(color, { r: 255, g: 255, b: 255 }, 0.35);
+  return `inset 0 0 160px 56px ${rgba(color, 0.42)}, inset 0 0 0 1px ${rgba(edge, 0.55)}`;
+}
+
+/** Moves the focus forward by one frame lasting `seconds`. Any spot in `safes` counts as on the work. */
+export function stepFocus(focus: Focus, reading: FocusReading, safes: Angle[], seconds: number): Focus {
   const handOverFace = !reading.faceVisible && reading.bodyVisible && reading.handOverFace;
   const lookingDown = !reading.faceVisible && reading.bodyVisible && !reading.handOverFace;
   const gone = !reading.faceVisible && !reading.bodyVisible;
   const missingSeconds = gone ? focus.missingSeconds + seconds : 0;
 
+  let activeIndex = safes.length > 0 ? Math.min(focus.activeIndex, safes.length - 1) : focus.activeIndex;
+  let onAngle = false;
+  if (reading.faceVisible && safes.length > 0) {
+    const matched = matchedAngleIndex(reading, safes);
+    if (matched !== null) {
+      activeIndex = matched;
+      onAngle = true;
+    }
+  }
+
   let rate: number;
   if (handOverFace) rate = 0;
   else if (gone) {
     rate = missingSeconds < FOCUS_SETTINGS.leftChairGraceSeconds ? 0 : 1 / FOCUS_SETTINGS.secondsToRedLeftChair;
-  } else if (lookingDown || !isOnAngle(reading, safe)) rate = 1 / FOCUS_SETTINGS.secondsToRedLookingAway;
+  } else if (lookingDown || !onAngle) rate = 1 / FOCUS_SETTINGS.secondsToRedLookingAway;
   else rate = -1 / FOCUS_SETTINGS.secondsToGreen;
 
   const redness = Math.min(1, Math.max(0, focus.redness + rate * seconds));
@@ -115,6 +203,8 @@ export function stepFocus(focus: Focus, reading: FocusReading, safe: Angle, seco
     distractions: focus.distractions + (bonkNow ? 1 : 0),
     memeVisible,
     memeGap,
+    activeIndex,
+    border: easeRgb(focus.border, mixRgb(safeColor(activeIndex), BORDER_RED, redness), seconds),
   };
 }
 

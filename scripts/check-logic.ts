@@ -1,7 +1,7 @@
 import { elapsedMs, endClock, formatDuration, pauseClock, resumeClock, sessionLengthMs, startClock } from "../src/sessionClock.ts";
 import { memeIsTooLong } from "../src/memes.ts";
 import { handInFaceBox, holdLock, shouldersNearLock, type FaceBox, type FaceSpot } from "../src/tracking/faceLock.ts";
-import { angleFromStored, focusState, showMeme, START_FOCUS, stepFocus, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
+import { angleFromStored, anglesFromStored, focusState, SAFE_COLORS, showMeme, START_FOCUS, stepFocus, type Angle, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
 
 const safe = { yaw: 0, pitch: -10 };
 const onWork = { faceVisible: true, bodyVisible: true, handOverFace: false, yaw: 3, pitch: -8 };
@@ -17,17 +17,17 @@ function check(name: string, ok: boolean, detail = "") {
   if (!ok) failures++;
 }
 
-function run(start: Focus, reading: FocusReading, seconds: number) {
+function run(start: Focus, reading: FocusReading, seconds: number, spots: Angle[] = [safe]) {
   let f = start;
-  for (let t = 0; t < seconds; t += FRAME) f = stepFocus(f, reading, safe, FRAME);
+  for (let t = 0; t < seconds; t += FRAME) f = stepFocus(f, reading, spots, FRAME);
   return f;
 }
 
-function secondsUntilRed(reading: FocusReading) {
+function secondsUntilRed(reading: FocusReading, spots: Angle[] = [safe]) {
   let f = START_FOCUS;
   let t = 0;
   while (f.redness < 1 && t < 60) {
-    f = stepFocus(f, reading, safe, FRAME);
+    f = stepFocus(f, reading, spots, FRAME);
     t += FRAME;
   }
   return t;
@@ -46,7 +46,7 @@ check("coming back in time reaches full green", run(away, onWork, 5).redness ===
 let fromRed = { ...START_FOCUS, redness: 1, bonked: true };
 let greenTime = 0;
 while (fromRed.redness > 0 && greenTime < 10) {
-  fromRed = stepFocus(fromRed, onWork, safe, FRAME);
+  fromRed = stepFocus(fromRed, onWork, [safe], FRAME);
   greenTime += FRAME;
 }
 check("looking back is 25% faster than 3 seconds", greenTime < 2.5 && greenTime > 2.2, `${greenTime.toFixed(2)}s`);
@@ -94,10 +94,33 @@ const pitchPast = { ...pitchEdge, pitch: safe.pitch + 13 };
 check("12 degrees up or down still counts as on the work", run(START_FOCUS, pitchEdge, 2).redness === 0);
 check("past 12 degrees starts turning red", run(START_FOCUS, pitchPast, 1).redness > 0);
 
+const spots = [
+  { yaw: 0, pitch: -10 },
+  { yaw: 50, pitch: -10 },
+  { yaw: -50, pitch: -10 },
+];
+const onSecond = { faceVisible: true, bodyVisible: true, handOverFace: false, yaw: 50, pitch: -10 };
+const outsideSpots = { faceVisible: true, bodyVisible: true, handOverFace: false, yaw: 25, pitch: -10 };
+const secondEdge = { faceVisible: true, bodyVisible: true, handOverFace: false, yaw: 65, pitch: -10 };
+const secondPast = { faceVisible: true, bodyVisible: true, handOverFace: false, yaw: 66, pitch: -10 };
+check("inside any of three spots stays green", run(START_FOCUS, onSecond, 2, spots).redness === 0);
+check("outside every spot reddens on the look-away timer", secondsUntilRed(outsideSpots, spots) === awayTime);
+check("15 degrees from a later spot still counts", run(START_FOCUS, secondEdge, 2, spots).redness === 0);
+check("past 15 degrees from every spot starts turning red", run(START_FOCUS, secondPast, 1, spots).redness > 0);
+const switched = stepFocus(START_FOCUS, onSecond, spots, 0.05);
+const colorDist = (a: { r: number; g: number; b: number }, b: { r: number; g: number; b: number }) =>
+  Math.hypot(a.r - b.r, a.g - b.g, a.b - b.b);
+check(
+  "a spot switch eases toward that color instead of jumping",
+  switched.activeIndex === 1 && colorDist(switched.border, SAFE_COLORS[0]) < colorDist(switched.border, SAFE_COLORS[1]),
+);
+const settled = run(switched, onSecond, 2, spots);
+check("the eased color arrives on the new spot", colorDist(settled.border, SAFE_COLORS[1]) < colorDist(settled.border, SAFE_COLORS[0]));
+
 let shown = START_FOCUS;
 let shownFor = 0;
 while (!showMeme(shown) && shownFor < 20) {
-  shown = stepFocus(shown, lookingAway, safe, FRAME);
+  shown = stepFocus(shown, lookingAway, [safe], FRAME);
   shownFor += FRAME;
 }
 const hid = run(shown, onWork, 0.1);
@@ -113,6 +136,9 @@ check("a meme past 15 seconds is refused", memeIsTooLong(15.01));
 check("an unreadable meme length is refused", memeIsTooLong(Number.NaN));
 check("a saved angle loads as one angle", storedSingle?.yaw === 4);
 check("a stored list keeps its first angle", storedList?.yaw === 1);
+const storedAngles = anglesFromStored([{ yaw: 1, pitch: 2 }, { yaw: 8, pitch: 9 }]);
+check("a stored list loads every angle", storedAngles.length === 2 && storedAngles[1].yaw === 8);
+check("one stored angle loads as a one-item list", anglesFromStored({ yaw: 4, pitch: 5 }).length === 1);
 
 const seated: FaceSpot = { x: 0.5, y: 0.4, size: 0.2 };
 const visitor: FaceSpot = { x: 0.85, y: 0.4, size: 0.18 };

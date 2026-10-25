@@ -373,15 +373,25 @@ button:active {
   gap: 0.35rem;
 }
 
-.calibration-primary {
+.calibration-primary,
+.calibration-alt {
   width: 100%;
   padding: 0.8rem 1rem;
-  border: none;
   border-radius: 999px;
-  background: #14f07a;
-  color: #04170c;
   font-size: 1rem;
   font-weight: 700;
+}
+
+.calibration-primary {
+  border: none;
+  background: #14f07a;
+  color: #04170c;
+}
+
+.calibration-alt {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: transparent;
+  color: #fff;
 }
 
 .calibration-secondary {
@@ -435,7 +445,7 @@ button:active {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  transition: box-shadow 0.4s ease;
+  transition: none;
 }
 
 .bubble {
@@ -2157,7 +2167,7 @@ button {
 
 /* Session overlay retains an unobstructed camera while making the controls coherent. */
 .focus-border {
-  transition: box-shadow 420ms var(--ease-out);
+  transition: none;
 }
 
 .meme-bonk img,

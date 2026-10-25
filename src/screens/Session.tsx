@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { MEME_FADE_MS } from "../memeSound";
 import type { Meme } from "../memes";
-import { borderHue, showMeme, type Focus } from "../tracking/focusState";
+import { borderShadow, showMeme, type Focus } from "../tracking/focusState";
 import MemeBonk from "./MemeBonk";
 import { usePresence } from "./usePresence";
 
@@ -33,7 +33,6 @@ export default function Session({
   const [menuOpen, setMenuOpen] = useState(false);
   const showMenu = paused || menuOpen;
   const menuPresence = usePresence(showMenu);
-  const hue = borderHue(focus.redness);
   const wantMeme = showMeme(focus) && !paused;
   const heldMeme = useRef(false);
   const [memeHeld, setMemeHeld] = useState(false);
@@ -70,7 +69,7 @@ export default function Session({
       <div
         className="focus-border"
         style={{
-          boxShadow: `inset 0 0 160px 56px hsla(${hue}, 92%, 52%, 0.42), inset 0 0 0 1px hsla(${hue}, 90%, 68%, 0.55)`,
+          boxShadow: borderShadow(focus.border),
         }}
       />
       {memeHeld && <MemeBonk meme={meme} leaving={memeLeaving} />}

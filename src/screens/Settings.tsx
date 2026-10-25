@@ -43,6 +43,7 @@ async function askCamera(): Promise<void> {
 
 export default function Settings({
   hasCalibration,
+  angleCount,
   showRecalibrate,
   memeVolume,
   ambientVolume,
@@ -56,6 +57,7 @@ export default function Settings({
   onTransitionEnd,
 }: {
   hasCalibration: boolean;
+  angleCount: number;
   showRecalibrate: boolean;
   memeVolume: number;
   ambientVolume: number;
@@ -69,6 +71,7 @@ export default function Settings({
   onTransitionEnd: (event: TransitionEvent<HTMLElement>) => void;
 }) {
   const camera = useCameraPermission();
+  const many = angleCount > 1;
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [clearing, setClearing] = useState(false);
   const dialogRef = useDialog(onClose);
@@ -109,10 +112,12 @@ export default function Settings({
             <h3>Focus</h3>
             <div className="settings-row">
               <div>
-                <strong>Safe angle</strong>
+                <strong>{many ? "Safe angles" : "Safe angle"}</strong>
                 <p className="muted">
                   {hasCalibration
-                    ? "Recalibrate if you moved your laptop, phone, or notebook."
+                    ? many
+                      ? "Safe angles are set. Recalibrate if you moved your laptop, phone, or notebook."
+                      : "Recalibrate if you moved your laptop, phone, or notebook."
                     : "Set when you start a session."}
                 </p>
               </div>
@@ -122,12 +127,12 @@ export default function Settings({
             </div>
             {hasCalibration && confirm !== "angle" && (
               <button className="text-button text-button--danger settings-link" data-sound="drop" onClick={() => setConfirm("angle")}>
-                Forget safe angle
+                {many ? "Forget safe angles" : "Forget safe angle"}
               </button>
             )}
             {confirm === "angle" && (
               <div className="settings-confirm">
-                <span>Forget the safe angle?</span>
+                <span>{many ? "Forget the safe angles?" : "Forget the safe angle?"}</span>
                 <button className="text-button" data-sound="drop" onClick={() => setConfirm(null)}>
                   Cancel
                 </button>

@@ -1,5 +1,6 @@
 import { useLayoutEffect, useState, type RefObject } from "react";
 import type { FaceBox } from "../tracking/faceLock";
+import { rgba, type Rgb } from "../tracking/focusState";
 
 type Place = { x: number; y: number; side: number };
 
@@ -26,15 +27,15 @@ function placeFaceSquare(video: HTMLVideoElement, box: FaceBox): Place | null {
   };
 }
 
-/** Square around the locked face. Hue matches the focus haze while a session is scoring. */
+/** Square around the locked face. Color matches the focus haze while a session is scoring. */
 export default function FaceSquare({
   videoRef,
   box,
-  hue,
+  color,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   box: FaceBox;
-  hue: number;
+  color: Rgb;
 }) {
   const [at, setAt] = useState<Place | null>(null);
 
@@ -58,8 +59,8 @@ export default function FaceSquare({
         top: at.y,
         width: at.side,
         height: at.side,
-        borderColor: `hsla(${hue}, 92%, 52%, 0.95)`,
-        background: `hsla(${hue}, 92%, 52%, 0.28)`,
+        borderColor: rgba(color, 0.95),
+        background: rgba(color, 0.28),
       }}
     />
   );

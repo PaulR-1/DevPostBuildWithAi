@@ -47,15 +47,15 @@ Source: `scope.md > The Core Loop`, `scope.md > What "Working" Looks Like`, `sco
 
 ### Calibration
 
-FocusRot asks you to look at your laptop, phone, or notebook. It saves the angle of your eyes. That saved angle is the safe angle. An angle off that spot is not safe.
+FocusRot asks whether to save more than one angle. No means one look at your laptop, phone, or notebook. Yes means you can save up to three spots, then press done. Each spot keeps the same safe box: 15 degrees left or right, and 12 degrees up or down. You are on the work when your eyes are inside any saved spot.
 
 ### On-work border
 
-While your eyes stay on the safe angle and you are in your chair, the border stays a faded green haze.
+While your eyes stay inside a saved spot and you are in your chair, the border stays a faded haze. The first spot is green, the second blue, and the third violet. Switching spots fades over about 0.6 seconds. The face square uses that same color. One saved spot stays green.
 
 ### Leaving the work
 
-Your eyes leave the safe angle. The border slowly turns from green to red. It does not disappear at once, and it does not snap to red.
+Your eyes leave every saved spot. The border slowly mixes that spot's color toward red. It does not disappear at once, and it does not snap to red.
 
 You look back before the border is fully red. The border becomes green again in about 2.4 seconds from full red. That is 25% faster than the earlier 3 seconds, the same speedup as a look-away.
 

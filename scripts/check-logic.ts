@@ -1,5 +1,6 @@
 import { elapsedMs, endClock, formatDuration, pauseClock, resumeClock, sessionLengthMs, startClock } from "../src/sessionClock.ts";
 import { memeIsTooLong } from "../src/memes.ts";
+import { clampTrim } from "../src/trimMedia.ts";
 import { handInFaceBox, holdLock, shouldersNearLock, type FaceBox, type FaceSpot } from "../src/tracking/faceLock.ts";
 import { angleFromStored, anglesFromStored, focusState, SAFE_COLORS, showMeme, START_FOCUS, stepFocus, type Angle, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
 
@@ -132,7 +133,11 @@ check("the meme can pop again after the 3 second gap", showMeme(afterGap) && aft
 const storedSingle = angleFromStored({ yaw: 4, pitch: 5 });
 const storedList = angleFromStored([{ yaw: 1, pitch: 2 }, { yaw: 8, pitch: 9 }]);
 check("a meme at 15 seconds is allowed", !memeIsTooLong(15));
-check("a meme past 15 seconds is refused", memeIsTooLong(15.01));
+check("a meme past 15 seconds is too long to store whole", memeIsTooLong(15.01));
+const pulled = clampTrim(0, 20, 40, "end");
+check("a trim cannot be longer than 15 seconds", pulled.end - pulled.start <= 15);
+const shortened = clampTrim(2, 6, 40, "end");
+check("a trim can be shorter than 15 seconds", shortened.end - shortened.start === 4);
 check("an unreadable meme length is refused", memeIsTooLong(Number.NaN));
 check("a saved angle loads as one angle", storedSingle?.yaw === 4);
 check("a stored list keeps its first angle", storedList?.yaw === 1);

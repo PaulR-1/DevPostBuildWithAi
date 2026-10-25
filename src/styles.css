@@ -1324,6 +1324,97 @@ button:active {
   margin: 0;
 }
 
+.meme-trim {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  width: 100%;
+}
+
+.meme-add-card .meme-trim-preview {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  max-height: min(42vh, 18rem);
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #000;
+}
+
+.meme-trim-track {
+  position: relative;
+  width: 100%;
+  height: 4.25rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  touch-action: none;
+}
+
+.meme-trim-wave {
+  position: absolute;
+  inset: 0.45rem 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.meme-trim-wave span {
+  flex: 1;
+  min-height: 3px;
+  border-radius: 2px;
+  background: rgba(234, 255, 242, 0.72);
+}
+
+.meme-trim-keep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 2px;
+  background: rgba(88, 244, 157, 0.28);
+  box-shadow: inset 0 0 0 2px var(--focus-green, #58f49d);
+  transition: none;
+}
+
+.meme-trim-handle {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  width: 1.1rem;
+  height: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: ew-resize;
+  touch-action: none;
+  transition: none;
+}
+
+.meme-trim-handle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  transform: translateX(-50%);
+  border-radius: 1px;
+  background: #fff;
+}
+
+.meme-trim-handle--start,
+.meme-trim-handle--start:active {
+  transform: translateX(-50%);
+}
+
+.meme-trim-handle--end,
+.meme-trim-handle--end:active {
+  transform: translateX(-50%);
+}
+
 .meme-add-card-preview,
 .meme-add-card img,
 .meme-add-card video {

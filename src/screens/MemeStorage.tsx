@@ -4,19 +4,31 @@ import {
   isCustomMeme,
   mediaDuration,
   MEME_LENGTH_MESSAGE,
+  MEME_MAX_SECONDS,
   MEME_NAME_LIMIT,
-  memeIsTooLong,
   memeNameFromFile,
   readMemeFile,
   type Meme,
 } from "../memes";
 import MemePreview from "./MemePreview";
 import { playDrop } from "../uiSound";
+import MemeTrim from "./MemeTrim";
+import { trimAudio, trimVideo } from "../trimMedia";
 import { useDialog } from "./useDialog";
 import { usePresence, type PresencePhase } from "./usePresence";
 
 type Step = "closed" | "pick" | "sound" | "draft";
-type Draft = { name: string; kind: Meme["kind"]; src: string; media?: Blob };
+type Draft = {
+  name: string;
+  kind: Meme["kind"];
+  src: string;
+  media?: Blob;
+  duration?: number;
+  trimStart?: number;
+  trimEnd?: number;
+  /** Object URL for a sound being trimmed. The picture stays in `src`. */
+  previewSrc?: string;
+};
 
 export default function MemeStorage({
   memes,
@@ -73,6 +85,7 @@ export default function MemeStorage({
 
   const closeDraft = () => {
     if (draft?.kind === "video") URL.revokeObjectURL(draft.src);
+    if (draft?.previewSrc) URL.revokeObjectURL(draft.previewSrc);
     setDraft(null);
     setStep("closed");
   };
@@ -97,11 +110,16 @@ export default function MemeStorage({
     if (!file || !draft) return;
     try {
       const seconds = await mediaDuration(file);
-      if (memeIsTooLong(seconds)) {
-        setError(MEME_LENGTH_MESSAGE);
-        return;
-      }
-      setDraft({ ...draft, media: file });
+      const long = seconds > MEME_MAX_SECONDS;
+      if (draft.previewSrc) URL.revokeObjectURL(draft.previewSrc);
+      setDraft({
+        ...draft,
+        media: file,
+        previewSrc: long ? URL.createObjectURL(file) : undefined,
+        duration: seconds,
+        trimStart: long ? 0 : undefined,
+        trimEnd: long ? Math.min(MEME_MAX_SECONDS, seconds) : undefined,
+      });
       setStep("draft");
       setError(null);
     } catch {
@@ -115,11 +133,16 @@ export default function MemeStorage({
     if (!file) return;
     try {
       const seconds = await mediaDuration(file);
-      if (memeIsTooLong(seconds)) {
-        setError(MEME_LENGTH_MESSAGE);
-        return;
-      }
-      setDraft({ src: URL.createObjectURL(file), name: memeNameFromFile(file), kind: "video", media: file });
+      const long = seconds > MEME_MAX_SECONDS;
+      setDraft({
+        src: URL.createObjectURL(file),
+        name: memeNameFromFile(file),
+        kind: "video",
+        media: file,
+        duration: seconds,
+        trimStart: long ? 0 : undefined,
+        trimEnd: long ? Math.min(MEME_MAX_SECONDS, seconds) : undefined,
+      });
       setStep("draft");
       setConfirmId(null);
       setError(null);
@@ -131,18 +154,35 @@ export default function MemeStorage({
   const addDraft = async () => {
     if (!draft || saving) return;
     const name = draft.name.trim().slice(0, MEME_NAME_LIMIT) || "My meme";
+    setSaving(true);
+    let media = draft.media;
+    let src = draft.src;
+    try {
+      if (draft.media && draft.trimStart != null && draft.trimEnd != null && (draft.duration ?? 0) > MEME_MAX_SECONDS) {
+        media = draft.kind === "video"
+          ? await trimVideo(draft.src, draft.trimStart, draft.trimEnd)
+          : await trimAudio(draft.media, draft.trimStart, draft.trimEnd);
+        if (draft.kind === "video") src = URL.createObjectURL(media);
+        if (!media.size) throw new Error("empty");
+      }
+    } catch {
+      setSaving(false);
+      setError(`FocusRot couldn't cut that file. ${MEME_LENGTH_MESSAGE}`);
+      return;
+    }
     const meme: Meme = {
       id: `custom-${crypto.randomUUID()}`,
       name,
-      src: draft.src,
+      src,
       kind: draft.kind,
       ending: "bonk",
-      media: draft.media,
-      audioSrc: draft.kind === "image" && draft.media ? URL.createObjectURL(draft.media) : undefined,
+      media,
+      audioSrc: draft.kind === "image" && media ? URL.createObjectURL(media) : undefined,
     };
-    setSaving(true);
     try {
       await onAdd(meme);
+      if (draft.kind === "video" && src !== draft.src) URL.revokeObjectURL(draft.src);
+      if (draft.previewSrc) URL.revokeObjectURL(draft.previewSrc);
       setDraft(null);
       setStep("closed");
       setError(null);
@@ -237,7 +277,19 @@ export default function MemeStorage({
           )}
           {draft && step !== "pick" && (
             <>
-              <MemePreview className="meme-add-card-preview" meme={{ ...draft, id: "draft", ending: "bonk" }} />
+              {draft.kind === "image" && (
+                <MemePreview className="meme-add-card-preview" meme={{ ...draft, id: "draft", ending: "bonk" }} />
+              )}
+              {draft.trimStart != null && draft.trimEnd != null && draft.duration != null && (draft.kind === "video" || draft.previewSrc) && (
+                <MemeTrim
+                  kind={draft.kind === "video" ? "video" : "image"}
+                  src={draft.kind === "video" ? draft.src : draft.previewSrc!}
+                  duration={draft.duration}
+                  start={draft.trimStart}
+                  end={draft.trimEnd}
+                  onChange={(trimStart, trimEnd) => setDraft((current) => (current ? { ...current, trimStart, trimEnd } : current))}
+                />
+              )}
               <label>
                 Name
                 <input

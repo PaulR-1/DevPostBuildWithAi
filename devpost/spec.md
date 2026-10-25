@@ -111,7 +111,7 @@ PRD ref: `prd.md > Session controls`.
 
 ### Meme Bonk
 
-Shows the chosen meme when the border finishes turning red, and adds one Bonk. A new pop waits 3 seconds from the moment the meme appeared. The count is labeled Bonks on the results screen and on the home page. The count still waits until you are fully back on a safe color before it can go up again.
+Shows the chosen meme when the border finishes turning red, and adds one Bonk. A new pop waits 3 seconds from the moment the meme appeared. The count is labeled Bonks on the results screen and on the home page. The count still waits until you are fully back on a safe color before it can go up again. Built-in memes play their own sound: Tralalero Tralala ends in bubbles instead of a bonk, Dust Baby flashes white with the flashbang, and Tung Tung Tung Sahur ends in a bonk. Added memes are a picture, a picture plus a sound, or a video of at most 15 seconds, and they end in the bonk. Looking back stops the sound.
 
 PRD ref: `prd.md > Leaving the work`.
 
@@ -126,7 +126,7 @@ PRD ref: `prd.md > Session history`.
 All of this lives in IndexedDB in Chrome on this laptop.
 
 - **Profile:** name, photo, and favourite meme.
-- **Meme library:** four sample images in the project, plus up to 20 images you add. Your chosen bonk meme is saved separately.
+- **Meme library:** three built-in memes with pictures and sounds, plus up to 20 you add. An added meme can include a sound or a video of at most 15 seconds. Your chosen bonk meme is saved separately.
 - **Calibration:** the safe eye angle. A list saved during the short multi-spot try is read as its first angle. Settings can delete it.
 - **Current session:** running, paused, or ended; start time; paused time; Bonk count; chosen meme.
 - **Past sessions:** session length, elapsed time, and Bonk count. The home page lists each line and sums them into Bonks, focus time, session count, and the day streak.

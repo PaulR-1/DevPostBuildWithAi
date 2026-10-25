@@ -59,7 +59,7 @@ Your eyes leave the safe angle. The border slowly turns from green to red. It do
 
 You look back before the border is fully red. The border becomes green again in about 2.4 seconds from full red. That is 25% faster than the earlier 3 seconds, the same speedup as a look-away.
 
-You do not look back. The border finishes turning red in about 6.4 seconds. That is 25% faster than the earlier 8 seconds, so the Bonk count goes up sooner. The meme you chose before the session pops up and bonks you. That counts as one Bonk. The meme does not appear the instant you look away, and it cannot pop again until 3 seconds have passed. `scope.md > Explicitly Cut` gives you a chance to come back first.
+You do not look back. The border finishes turning red in about 6.4 seconds. That is 25% faster than the earlier 8 seconds, so the Bonk count goes up sooner. The meme you chose before the session pops up and bonks you. That counts as one Bonk. The meme does not appear the instant you look away, and it cannot pop again until 3 seconds have passed. The built-in memes are Tralalero Tralala (his sound, then bubbles, no bonk hit), Dust Baby (a white flash as the flashbang sound starts), and Tung Tung Tung Sahur (his sound, then a bonk hit). A meme you add is a picture, a picture with a sound, or a video, at most 15 seconds, and it always ends with the bonk hit. `scope.md > Explicitly Cut` gives you a chance to come back first.
 
 ### Leaving the chair
 

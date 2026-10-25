@@ -1,4 +1,5 @@
 import { elapsedMs, endClock, formatDuration, pauseClock, resumeClock, sessionLengthMs, startClock } from "../src/sessionClock.ts";
+import { memeIsTooLong } from "../src/memes.ts";
 import { angleFromStored, focusState, showMeme, START_FOCUS, stepFocus, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
 
 const safe = { yaw: 0, pitch: -10 };
@@ -100,6 +101,9 @@ check("the meme can pop again after the 3 second gap", showMeme(afterGap) && aft
 
 const storedSingle = angleFromStored({ yaw: 4, pitch: 5 });
 const storedList = angleFromStored([{ yaw: 1, pitch: 2 }, { yaw: 8, pitch: 9 }]);
+check("a meme at 15 seconds is allowed", !memeIsTooLong(15));
+check("a meme past 15 seconds is refused", memeIsTooLong(15.01));
+check("an unreadable meme length is refused", memeIsTooLong(Number.NaN));
 check("a saved angle loads as one angle", storedSingle?.yaw === 4);
 check("a stored list keeps its first angle", storedList?.yaw === 1);
 

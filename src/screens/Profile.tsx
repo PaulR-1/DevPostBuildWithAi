@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type TransitionEvent } from "react";
 import type { Meme } from "../memes";
+import MemePreview from "./MemePreview";
 import { getSetting, setSetting } from "../storage/focusDb";
 import { useDialog } from "./useDialog";
 import type { PresencePhase } from "./usePresence";
@@ -142,7 +143,7 @@ export default function Profile({
           <span className="muted">Favourite meme</span>
           <p className="muted">A display only. It does not pick the meme that bonks you.</p>
           <div className="profile-favourite-pick">
-            {favourite && <img src={favourite.src} alt="" />}
+            {favourite && <MemePreview meme={favourite} />}
             <select
               id="favourite-meme"
               aria-label="Favourite meme"

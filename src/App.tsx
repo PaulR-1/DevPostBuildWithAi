@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isCustomMeme, memeById, reviveMeme, SAMPLE_MEMES, storedMeme, type Meme } from "./memes";
 import Calibration from "./screens/Calibration";
+import FaceSquare from "./screens/FaceSquare";
 import Home from "./screens/Home";
 import Pause from "./screens/Pause";
 import Results, { type SessionStats } from "./screens/Results";
@@ -12,7 +13,7 @@ import { elapsedMs, endClock, pauseClock, resumeClock, sessionLengthMs, startClo
 import { addSession, deleteSetting, getSetting, setSetting, type PastSession } from "./storage/focusDb";
 import type { ProfileData } from "./screens/Profile";
 import type { Reading } from "./tracking/faceTracking";
-import { angleFromStored, START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
+import { angleFromStored, borderHue, START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
 import { useTracking } from "./tracking/useTracking";
 
 type Phase =
@@ -205,6 +206,13 @@ export default function App() {
   return (
     <div className="app">
       {cameraOn && <video ref={videoRef} className="camera" playsInline muted />}
+      {cameraOn && reading?.faceBox && (
+        <FaceSquare
+          videoRef={videoRef}
+          box={reading.faceBox}
+          hue={borderHue(phase === "running" || phase === "paused" ? focus.redness : 0)}
+        />
+      )}
 
       {phase === "home" && (
         <Home
@@ -220,13 +228,7 @@ export default function App() {
         />
       )}
       {phase === "calibrating" && (
-        <Calibration
-          status={status}
-          reading={reading}
-          savedAngle={savedAngle}
-          onCalibrated={onCalibrated}
-          onCancel={() => setPhase("home")}
-        />
+        <Calibration status={status} reading={reading} onCalibrated={onCalibrated} onCancel={() => setPhase("home")} />
       )}
       {phase === "recalibrating-home" && (
         <Calibration status={status} reading={reading} onCalibrated={onRecalibratedHome} onCancel={() => setPhase("home")} />
@@ -258,6 +260,7 @@ export default function App() {
       {settingsPresence.mounted && (
         <Settings
           hasCalibration={savedAngle !== null}
+          showRecalibrate={phase === "running" || phase === "paused"}
           onRecalibrate={recalibrate}
           onForgetCalibration={forgetCalibration}
           onSessionsCleared={() => setSessionsEpoch((n) => n + 1)}

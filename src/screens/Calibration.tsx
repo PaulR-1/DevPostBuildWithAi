@@ -12,14 +12,11 @@ type Step = { name: "idle" } | { name: "countdown"; left: number } | { name: "sa
 export default function Calibration({
   status,
   reading,
-  savedAngle,
   onCalibrated,
   onCancel,
 }: {
   status: TrackingStatus;
   reading: Reading | null;
-  /** When set, offers to skip calibrating and reuse this angle. */
-  savedAngle?: Angle | null;
   onCalibrated: (safe: Angle) => void;
   onCancel: () => void;
 }) {
@@ -82,11 +79,6 @@ export default function Calibration({
             <button className="calibration-quiet" onClick={onCancel}>
               Back
             </button>
-            {canCalibrate && savedAngle && (
-              <button className="calibration-quiet" onClick={() => onCalibrated(savedAngle)}>
-                Use saved angle
-              </button>
-            )}
           </div>
         </div>
       </div>

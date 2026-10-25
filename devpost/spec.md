@@ -75,7 +75,7 @@ PRD ref: `prd.md > The Core Journey`.
 
 ### Settings
 
-Opens from the account menu and from the session bubble. Safe angle can be recalibrated or forgotten. Forget during a running session sends you to calibrate again; the live angle stays until that finishes, so the border does not freeze. Camera shows whether Chrome has allowed the camera, can ask Chrome to allow it, and shows the unblock message when it has not. History deletes every saved session after a confirm.
+Opens from the account menu and from the session bubble. The safe angle, including recalibrate and forget, is only in Settings opened from the session bubble. Forget during a running session sends you to calibrate again; the live angle stays until that finishes, so the border does not freeze. Camera shows whether Chrome has allowed the camera, can ask Chrome to allow it, and shows the unblock message when it has not. History deletes every saved session after a confirm.
 
 PRD ref: `prd.md > Session controls`.
 
@@ -180,7 +180,7 @@ project/
 ## Important Failure Modes
 
 - **Camera blocked or face missing before start** → show the note to unblock the camera and show your face. Wait to show "Session Start!" Implements `prd.md > States and Boundaries`.
-- **Face disappears during a session** → if your body is also gone for more than 1 second, treat it as leaving the chair and turn the border fully red in about 3.3 seconds. If your body is still there, the face is just hidden (for example a hand over it), and the border holds. Implements `prd.md > Leaving the chair`.
+- **Face disappears during a session** → if your body is also gone for more than 1 second, treat it as leaving the chair and turn the border fully red in about 3.3 seconds. If your shoulders stay and a wrist or index finger is inside the last face square, the face is covered and the border holds. If your shoulders stay and no hand is in that square, treat it as a look-away: full red in about 6.4 seconds. Implements `prd.md > Leaving the chair`.
 - **MediaPipe cannot load** → say face tracking is unavailable. Do not run a session that pretends to see you.
 
 ## What Was Simplified and Why

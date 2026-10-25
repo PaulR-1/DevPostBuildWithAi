@@ -1,12 +1,14 @@
 import { elapsedMs, endClock, formatDuration, pauseClock, resumeClock, sessionLengthMs, startClock } from "../src/sessionClock.ts";
 import { memeIsTooLong } from "../src/memes.ts";
+import { handInFaceBox, holdLock, shouldersNearLock, type FaceBox, type FaceSpot } from "../src/tracking/faceLock.ts";
 import { angleFromStored, focusState, showMeme, START_FOCUS, stepFocus, type Focus, type FocusReading } from "../src/tracking/focusState.ts";
 
 const safe = { yaw: 0, pitch: -10 };
-const onWork = { faceVisible: true, bodyVisible: true, yaw: 3, pitch: -8 };
-const lookingAway = { faceVisible: true, bodyVisible: true, yaw: 40, pitch: -8 };
-const leftChair = { faceVisible: false, bodyVisible: false, yaw: 0, pitch: 0 };
-const handOverFace = { faceVisible: false, bodyVisible: true, yaw: 0, pitch: 0 };
+const onWork = { faceVisible: true, bodyVisible: true, handOverFace: false, yaw: 3, pitch: -8 };
+const lookingAway = { faceVisible: true, bodyVisible: true, handOverFace: false, yaw: 40, pitch: -8 };
+const leftChair = { faceVisible: false, bodyVisible: false, handOverFace: false, yaw: 0, pitch: 0 };
+const handOverFace = { faceVisible: false, bodyVisible: true, handOverFace: true, yaw: 0, pitch: 0 };
+const lookingDown = { faceVisible: false, bodyVisible: true, handOverFace: false, yaw: 0, pitch: 0 };
 const FRAME = 1 / 30;
 
 let failures = 0;
@@ -67,6 +69,11 @@ const covered = run(START_FOCUS, handOverFace, 10);
 check("hand over face with body in chair does not turn red", covered.redness === 0 && focusState(covered) === "face-hidden");
 const coveredWhileDrifting = run(away, handOverFace, 5);
 check("hand over face holds the border where it was", coveredWhileDrifting.redness === away.redness);
+const down = run(START_FOCUS, lookingDown, 2);
+const awaySame = run(START_FOCUS, lookingAway, 2);
+check("face gone with no hand turns red like a look-away", down.redness === awaySame.redness && down.redness > 0 && down.redness < 1);
+check("face gone with no hand is not the faster chair timer", secondsUntilRed(lookingDown) === awayTime);
+check("face gone with no hand can bonk once", run(START_FOCUS, lookingDown, 10).distractions === 1);
 
 check("drifting does not count a distraction", away.distractions === 0);
 const bonk = run(START_FOCUS, lookingAway, 20);
@@ -78,11 +85,11 @@ check("coming back fully then looking away again counts a second", second.distra
 check("meme hides once you look back", !showMeme(run(bonk, onWork, 0.1)));
 check("leaving the chair counts as a distraction too", run(START_FOCUS, leftChair, 10).distractions === 1);
 
-const yawEdge = { faceVisible: true, bodyVisible: true, yaw: safe.yaw + 15, pitch: safe.pitch };
+const yawEdge = { faceVisible: true, bodyVisible: true, handOverFace: false, yaw: safe.yaw + 15, pitch: safe.pitch };
 const yawPast = { ...yawEdge, yaw: safe.yaw + 16 };
 check("15 degrees left or right still counts as on the work", run(START_FOCUS, yawEdge, 2).redness === 0);
 check("past 15 degrees starts turning red", run(START_FOCUS, yawPast, 1).redness > 0);
-const pitchEdge = { faceVisible: true, bodyVisible: true, yaw: safe.yaw, pitch: safe.pitch + 12 };
+const pitchEdge = { faceVisible: true, bodyVisible: true, handOverFace: false, yaw: safe.yaw, pitch: safe.pitch + 12 };
 const pitchPast = { ...pitchEdge, pitch: safe.pitch + 13 };
 check("12 degrees up or down still counts as on the work", run(START_FOCUS, pitchEdge, 2).redness === 0);
 check("past 12 degrees starts turning red", run(START_FOCUS, pitchPast, 1).redness > 0);
@@ -106,6 +113,25 @@ check("a meme past 15 seconds is refused", memeIsTooLong(15.01));
 check("an unreadable meme length is refused", memeIsTooLong(Number.NaN));
 check("a saved angle loads as one angle", storedSingle?.yaw === 4);
 check("a stored list keeps its first angle", storedList?.yaw === 1);
+
+const seated: FaceSpot = { x: 0.5, y: 0.4, size: 0.2 };
+const visitor: FaceSpot = { x: 0.85, y: 0.4, size: 0.18 };
+const larger: FaceSpot = { x: 0.2, y: 0.3, size: 0.3 };
+const smaller: FaceSpot = { x: 0.7, y: 0.3, size: 0.1 };
+const firstLock = holdLock(null, [smaller, larger]);
+check("the larger face wins when there is no lock", firstLock.chosen === larger && firstLock.lock === larger);
+const nearby: FaceSpot = { x: 0.55, y: 0.42, size: 0.2 };
+const stayed = holdLock(seated, [visitor, nearby]);
+check("a nearby face keeps the lock", stayed.chosen === nearby && stayed.lock === nearby);
+const rejected = holdLock(seated, [visitor]);
+check("a far face is rejected and the lock does not move", rejected.chosen === null && rejected.lock === seated);
+const returned = holdLock(rejected.lock, [nearby]);
+check("a return near the old spot is accepted again", returned.chosen === nearby && returned.lock === nearby);
+check("shoulders under the lock still count as the seated person", shouldersNearLock({ x: 0.5, y: 0.7 }, seated));
+check("shoulders across the frame do not count", !shouldersNearLock({ x: 0.95, y: 0.9 }, seated));
+const faceBox: FaceBox = { x: 0.5, y: 0.4, size: 0.2 };
+check("a hand inside the grown face square counts", handInFaceBox({ x: 0.62, y: 0.4 }, faceBox, 1));
+check("a hand outside the grown face square does not count", !handInFaceBox({ x: 0.66, y: 0.4 }, faceBox, 1));
 
 let clock = startClock(0);
 clock = pauseClock(clock, 60_000);

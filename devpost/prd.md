@@ -65,7 +65,9 @@ You do not look back. The border finishes turning red in about 6.4 seconds. That
 
 You leave your chair and you do not pause. The border reaches full red in about 3.3 seconds. That is 50% faster than the earlier 5 seconds, and still faster than a look away. A gap shorter than 1 second does not count. The session clock does not speed up. Only the border does.
 
-You cover your face, for example with your hand, but you are still in your chair. That is not leaving the chair. The border stays where it is until FocusRot can see your eyes again. You chose this at the first build checkpoint, for clarity.
+You cover your face with your hand, but you are still in your chair. That is not leaving the chair. The border stays where it is until FocusRot can see your eyes again. A hand counts when a wrist or index finger is inside the last face square. You chose this at the first build checkpoint, for clarity.
+
+You look down until your face leaves the camera, your shoulders stay, and your hand is not in that square. That is a look-away, not leaving the chair. The border reaches full red in about 6.4 seconds.
 
 Noted before removal, as you asked: slumping is out. No slouch detection, no "bad sitting" check, and no other function about how you sit while still in the chair. `scope.md > The Unique Kernel` watches posture. For this proof, posture means whether you have left the chair.
 
@@ -73,7 +75,7 @@ Noted before removal, as you asked: slumping is out. No slouch detection, no "ba
 
 The bubble is the app icon. Clicking it can stop the session, pause the session, or open settings.
 
-Settings opens from the account menu and from the session bubble. Safe angle can be recalibrated, or forgotten. Forget during a running session closes Settings and asks you to calibrate again. The border keeps using the last angle until that new calibrate finishes, so it does not freeze. Camera shows whether the camera is allowed, and can ask Chrome to allow it. History can delete every saved session from this browser, after you confirm.
+Settings opens from the account menu and from the session bubble. The safe angle, including recalibrate and forget, is only in Settings opened from the session bubble. Forget during a running session closes Settings and asks you to calibrate again. The border keeps using the last angle until that new calibrate finishes, so it does not freeze. Camera shows whether the camera is allowed, and can ask Chrome to allow it. History can delete every saved session from this browser, after you confirm.
 
 Pause shows the words "Session Pause" in the same font as "Session Start!" That screen stays until you unpause. The pause button’s place shows a play button. You press play to unpause.
 
@@ -109,7 +111,7 @@ You count one Bonk when the meme comes out. The meme comes out when the border f
 - With no past session yet, the spot shows "Nothing here yet" and a hint to press start. You chose both.
 - If the camera is off or your face cannot be seen when you press start, a notification tells you to unblock the camera and show your face. FocusRot waits until it can see your face before "Session Start!" You confirmed that wait.
 - Pause shows "Session Pause" in the same font as "Session Start!" and stays on that screen until you unpause. You press the play button in the pause button’s place to unpause.
-- Settings shows the safe angle, camera, and history. Recalibrate saves a new safe eye angle. Forget drops the saved angle. Camera shows whether the camera is allowed, and can ask Chrome to allow it. History can delete every saved session after you confirm.
+- Settings shows the camera and history. From the session bubble it also shows the safe angle. Recalibrate saves a new safe eye angle. Forget drops the saved angle. Camera shows whether the camera is allowed, and can ask Chrome to allow it. History can delete every saved session after you confirm.
 - Profile shows a name, a profile photo, and a favourite meme. The favourite meme is a display. It does not pick the meme for today's session. The name and photo open from the account menu.
 - There are sample memes, and you can add up to 20 of your own images. Before a session starts, you choose which one will bonk you. Adding your own image was brought in with the home-screen polish. Random choice, custom audio, and text-to-speech stay out.
 - The chosen meme bonks you when the border finishes turning red. It does not bonk the instant you look away. You already answered this. One distraction is counted then.

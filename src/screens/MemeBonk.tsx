@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BONK_SRC, MEME_FADE_MS, playFile, playSting, SPLASH_SRC, type Playing } from "../memeSound";
-import { isCustomMeme, type Meme } from "../memes";
+import type { Meme } from "../memes";
 
 const BUBBLES = Array.from({ length: 52 }, (_, i) => ({
   id: i,
@@ -28,13 +28,11 @@ export default function MemeBonk({ meme, leaving }: { meme: Meme; leaving: boole
   const players = useRef<Playing[]>([]);
   const leavingRef = useRef(leaving);
   leavingRef.current = leaving;
-  const builtin = !isCustomMeme(meme.id);
   const [bubbles, setBubbles] = useState(meme.ending === "splash");
-  const [flash, setFlash] = useState(builtin);
-  const [bonkWord, setBonkWord] = useState(builtin);
+  const [flash, setFlash] = useState(true);
+  const [bonkWord, setBonkWord] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
     const active: Playing[] = [];
     players.current = active;
     const video = videoRef.current;
@@ -44,32 +42,20 @@ export default function MemeBonk({ meme, leaving }: { meme: Meme; leaving: boole
       return playing;
     };
 
-    const endClip = () => {
-      if (cancelled || leavingRef.current) return;
-      if (!builtin && meme.ending === "bonk") {
-        track(playFile(BONK_SRC));
-        setBonkWord(true);
-      }
-    };
-
-    if (builtin) track(playFile(BONK_SRC));
+    track(playFile(BONK_SRC));
     if (meme.ending === "splash") track(playFile(SPLASH_SRC));
 
     if (meme.kind === "video" && video) {
       video.volume = 1;
       video.currentTime = 0;
-      video.onended = endClip;
-      video.play().catch(endClip);
+      video.play().catch(() => {});
     } else if (meme.audioSrc) {
-      track(playFile(meme.audioSrc)).done.then(endClip);
+      track(playFile(meme.audioSrc));
     } else if (meme.ending === "bonk") {
-      track(playSting()).done.then(endClip);
-    } else {
-      endClip();
+      track(playSting());
     }
 
     return () => {
-      cancelled = true;
       active.forEach((playing) => playing.stop());
       if (video) {
         video.onended = null;

@@ -43,29 +43,36 @@ export default function Profile({
   const [profile, setProfile] = useState<ProfileData>({});
   const [confirmRemove, setConfirmRemove] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  const dirty = useRef(false);
+  const edited = useRef(false);
   const dialogRef = useDialog(onClose);
 
   useEffect(() => {
     let cancelled = false;
     getSetting<ProfileData>("profile").then((p) => {
-      if (!cancelled && p) setProfile((prev) => (dirty.current ? prev : p));
+      if (!cancelled && p && !edited.current) setProfile(p);
     });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const save = (change: Partial<ProfileData>, remove: (keyof ProfileData)[] = []) => {
-    dirty.current = true;
+  const edit = (change: Partial<ProfileData>, remove: (keyof ProfileData)[] = []) => {
+    edited.current = true;
     setProfile((prev) => {
       const next: ProfileData = { ...prev, ...change };
       for (const key of remove) delete next[key];
-      setSetting("profile", next);
-      onChange(next);
       return next;
     });
     setConfirmRemove(false);
+  };
+
+  const save = () => {
+    const next: ProfileData = { ...profile };
+    if (!next.name?.trim()) delete next.name;
+    else next.name = next.name.trim();
+    setSetting("profile", next);
+    onChange(next);
+    onClose();
   };
 
   const onPhoto = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -73,16 +80,10 @@ export default function Profile({
     e.target.value = "";
     if (!file) return;
     try {
-      save({ photo: await readPhoto(file) });
+      edit({ photo: await readPhoto(file) });
     } catch {
       // A photo that can't be read stays as it was.
     }
-  };
-
-  const onName = (value: string) => {
-    const name = value.slice(0, NAME_LIMIT);
-    if (name.trim()) save({ name });
-    else save({}, ["name"]);
   };
 
   const favourite = memes.find((meme) => meme.id === profile.favouriteMemeId) ?? null;
@@ -121,7 +122,7 @@ export default function Profile({
                 <button className="text-button" onClick={() => setConfirmRemove(false)}>
                   Cancel
                 </button>
-                <button className="pill-button pill-button--danger" onClick={() => save({}, ["photo"])}>
+                <button className="pill-button pill-button--danger" onClick={() => edit({}, ["photo"])}>
                   Remove
                 </button>
               </div>
@@ -135,7 +136,7 @@ export default function Profile({
             value={profile.name ?? ""}
             maxLength={NAME_LIMIT}
             placeholder="What should we call you?"
-            onChange={(e) => onName(e.target.value)}
+            onChange={(e) => edit({ name: e.target.value.slice(0, NAME_LIMIT) })}
           />
         </label>
 
@@ -148,7 +149,7 @@ export default function Profile({
               id="favourite-meme"
               aria-label="Favourite meme"
               value={profile.favouriteMemeId ?? ""}
-              onChange={(e) => (e.target.value ? save({ favouriteMemeId: e.target.value }) : save({}, ["favouriteMemeId"]))}
+              onChange={(e) => (e.target.value ? edit({ favouriteMemeId: e.target.value }) : edit({}, ["favouriteMemeId"]))}
             >
               <option value="">None yet</option>
               {memes.map((m) => (
@@ -158,16 +159,21 @@ export default function Profile({
               ))}
             </select>
             {favourite && (
-              <button className="text-button text-button--danger" onClick={() => save({}, ["favouriteMemeId"])}>
+              <button className="pill-button" onClick={() => edit({}, ["favouriteMemeId"])}>
                 Clear
               </button>
             )}
           </div>
         </div>
 
-        <button className="pill-button" onClick={onClose}>
-          Close
-        </button>
+        <div className="profile-actions">
+          <button className="pill-button pill-button--primary" onClick={save}>
+            Save
+          </button>
+          <button className="pill-button" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );

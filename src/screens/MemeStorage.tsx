@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode, type TransitionEvent } from "react";
 import {
   CUSTOM_MEME_LIMIT,
   isCustomMeme,
@@ -11,6 +11,8 @@ import {
   type Meme,
 } from "../memes";
 import MemePreview from "./MemePreview";
+import { useDialog } from "./useDialog";
+import { usePresence, type PresencePhase } from "./usePresence";
 
 type Step = "closed" | "pick" | "sound" | "draft";
 type Draft = { name: string; kind: Meme["kind"]; src: string; media?: Blob };
@@ -36,9 +38,37 @@ export default function MemeStorage({
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [moreBelow, setMoreBelow] = useState(false);
+  const adding = step !== "closed";
+  const sheet = usePresence(adding);
+  const confirmSheet = usePresence(confirmId !== null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const customCount = memes.filter((meme) => isCustomMeme(meme.id)).length;
   const full = customCount >= CUSTOM_MEME_LIMIT;
   const confirming = memes.find((meme) => meme.id === confirmId) ?? null;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const measure = () => setMoreBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 8);
+    measure();
+    el.addEventListener("scroll", measure, { passive: true });
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => {
+      el.removeEventListener("scroll", measure);
+      observer.disconnect();
+    };
+  }, [memes.length, confirming]);
+
+  const scrollMore = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const tile = el.querySelector<HTMLElement>(".meme-slot, .meme-add");
+    const distance = tile ? tile.getBoundingClientRect().height + 10 : 128;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollBy({ top: distance, behavior: reduce ? "auto" : "smooth" });
+  };
 
   const closeDraft = () => {
     if (draft?.kind === "video") URL.revokeObjectURL(draft.src);
@@ -124,12 +154,15 @@ export default function MemeStorage({
   };
 
   return (
-    <section className="home-card home-card--memes">
-      <h2>Meme storage</h2>
-      <p className="muted">
-        {full ? "Storage holds 20 of your own memes." : `Pick the meme that bonks you this session. ${MEME_LENGTH_MESSAGE}`}
-      </p>
-      <div className="meme-grid">
+    <>
+      <section className="home-card home-card--memes">
+        <h2>Meme storage</h2>
+        <p className="muted">
+          {full ? "Storage holds 20 of your own memes." : `Pick the meme that bonks you this session. ${MEME_LENGTH_MESSAGE}`}
+        </p>
+        <div className="meme-sheet-body">
+          <div className="meme-sheet-scroll" ref={scrollRef}>
+            <div className="meme-grid">
         {memes.map((meme) => (
           <div className="meme-slot" key={meme.id}>
             <button
@@ -167,12 +200,24 @@ export default function MemeStorage({
           <span>{full ? "Full" : "Add"}</span>
         </button>
       </div>
+            </div>
+          {moreBelow && (
+            <button type="button" className="meme-scroll-more" onClick={scrollMore} aria-label="More memes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+          )}
+        </div>
+        {error && <p className="meme-note meme-note--error">{error}</p>}
+      </section>
       <input ref={imageInput} className="meme-file" type="file" accept="image/*" hidden onChange={onImage} />
       <input ref={audioInput} className="meme-file" type="file" accept="audio/*" hidden onChange={onAudio} />
       <input ref={videoInput} className="meme-file" type="file" accept="video/*" hidden onChange={onVideo} />
-      {error && <p className="meme-note meme-note--error">{error}</p>}
-      {step !== "closed" && (
-        <div className="meme-add-card">
+      {sheet.mounted && (
+        <MemeSheetFrame phase={sheet.phase} titleId="meme-add-title" onClose={closeDraft} onTransitionEnd={sheet.onTransitionEnd}>
+          <h2 id="meme-add-title">Add a meme</h2>
+          <div className="meme-add-card">
           {step === "pick" && (
             <>
               <p>Add a picture or a video. {MEME_LENGTH_MESSAGE}</p>
@@ -183,7 +228,7 @@ export default function MemeStorage({
                 <button className="pill-button" onClick={() => videoInput.current?.click()}>
                   Video
                 </button>
-                <button className="text-button" onClick={() => setStep("closed")}>
+                <button className="pill-button" onClick={() => setStep("closed")}>
                   Cancel
                 </button>
               </div>
@@ -204,7 +249,7 @@ export default function MemeStorage({
                   }}
                 />
               </label>
-              {step === "sound" && <p>Add a sound for this picture? Skip it and a short tune plays, then the bonk.</p>}
+              {step === "sound" && <p>Add a sound for this picture? Skip it and a short tune plays after the bonk.</p>}
               <div className="meme-draft-actions">
                 {step === "sound" && (
                   <>
@@ -221,33 +266,59 @@ export default function MemeStorage({
                     {saving ? "Saving…" : "Add"}
                   </button>
                 )}
-                <button className="text-button" onClick={closeDraft}>
+                <button className="pill-button" onClick={closeDraft}>
                   Cancel
                 </button>
               </div>
             </>
           )}
-        </div>
+          </div>
+        </MemeSheetFrame>
       )}
-      {confirming && (
-        <div className="settings-confirm meme-confirm">
-          <span>Remove {confirming.name}?</span>
-          <div className="settings-confirm-actions">
-            <button className="text-button" onClick={() => setConfirmId(null)}>
-              Cancel
-            </button>
-            <button
-              className="pill-button pill-button--danger"
-              onClick={() => {
-                onRemove(confirming.id);
-                setConfirmId(null);
-              }}
-            >
+      {confirmSheet.mounted && confirming && (
+        <MemeSheetFrame phase={confirmSheet.phase} titleId="meme-remove-title" onClose={() => setConfirmId(null)} onTransitionEnd={confirmSheet.onTransitionEnd}>
+          <h2 id="meme-remove-title">Remove {confirming.name}?</h2>
+          <div className="meme-draft-actions">
+            <button className="pill-button pill-button--danger" onClick={() => { onRemove(confirming.id); setConfirmId(null); }}>
               Remove
             </button>
+            <button className="pill-button" onClick={() => setConfirmId(null)}>
+              Cancel
+            </button>
           </div>
-        </div>
+        </MemeSheetFrame>
       )}
-    </section>
+    </>
+  );
+}
+
+function MemeSheetFrame({
+  phase,
+  titleId,
+  onClose,
+  onTransitionEnd,
+  children,
+}: {
+  phase: PresencePhase;
+  titleId: string;
+  onClose: () => void;
+  onTransitionEnd: (event: TransitionEvent<HTMLElement>) => void;
+  children: ReactNode;
+}) {
+  const ref = useDialog(onClose);
+  return (
+    <div className="meme-sheet-backdrop" data-phase={phase} onClick={onClose} onTransitionEnd={onTransitionEnd}>
+      <div
+        className="meme-sheet home-card"
+        ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        data-phase={phase}
+        onClick={(event) => event.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>
   );
 }

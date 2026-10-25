@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import type { Meme } from "../memes";
+import MemePreview from "./MemePreview";
 import { formatDuration } from "../sessionClock";
 import { listSessions, type PastSession } from "../storage/focusDb";
 import AccountMenu from "./AccountMenu";
@@ -70,7 +71,7 @@ export default function Home({
 
         <section className="home-card home-launch" aria-label="Start session">
           <div className="home-launch-main">
-            {chosen && <img className="home-launch-meme" src={chosen.src} alt="" />}
+            {chosen && <MemePreview className="home-launch-meme" meme={chosen} />}
             <div className="home-launch-copy">
               <p className="muted">Chosen meme</p>
               <strong>{chosen?.name ?? "Meme"}</strong>

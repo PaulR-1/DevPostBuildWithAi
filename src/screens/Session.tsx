@@ -1,6 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { MEME_FADE_MS } from "../memeSound";
 import type { Meme } from "../memes";
 import { borderHue, showMeme, type Focus } from "../tracking/focusState";
+import MemeBonk from "./MemeBonk";
 import { usePresence } from "./usePresence";
 
 function MenuIcon({ children }: { children: ReactNode }) {
@@ -32,6 +34,27 @@ export default function Session({
   const showMenu = paused || menuOpen;
   const menuPresence = usePresence(showMenu);
   const hue = borderHue(focus.redness);
+  const wantMeme = showMeme(focus) && !paused;
+  const heldMeme = useRef(false);
+  const [memeHeld, setMemeHeld] = useState(false);
+  const [memeLeaving, setMemeLeaving] = useState(false);
+
+  useEffect(() => {
+    if (wantMeme) {
+      heldMeme.current = true;
+      setMemeHeld(true);
+      setMemeLeaving(false);
+      return;
+    }
+    if (!heldMeme.current) return;
+    setMemeLeaving(true);
+    const timer = window.setTimeout(() => {
+      heldMeme.current = false;
+      setMemeHeld(false);
+      setMemeLeaving(false);
+    }, MEME_FADE_MS);
+    return () => clearTimeout(timer);
+  }, [wantMeme]);
 
   useEffect(() => {
     if (!showMenu || paused) return;
@@ -50,11 +73,7 @@ export default function Session({
           boxShadow: `inset 0 0 160px 56px hsla(${hue}, 92%, 52%, 0.42), inset 0 0 0 1px hsla(${hue}, 90%, 68%, 0.55)`,
         }}
       />
-      {showMeme(focus) && !paused && (
-        <div className="meme-bonk">
-          <img src={meme.src} alt={meme.name} />
-        </div>
-      )}
+      {memeHeld && <MemeBonk meme={meme} leaving={memeLeaving} />}
       <div className="bubble">
         <button
           className="bubble-icon"

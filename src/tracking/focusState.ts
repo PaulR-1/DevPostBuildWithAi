@@ -14,6 +14,10 @@ export type Focus = {
   /** The meme already bonked for this look-away; cleared once the border is fully green again. */
   bonked: boolean;
   distractions: number;
+  /** The meme is on screen. A flicker cannot turn this back on until `memeGap` runs out. */
+  memeVisible: boolean;
+  /** Seconds left before the meme may appear again. Counts down from the moment it appears. */
+  memeGap: number;
 };
 
 export const FOCUS_SETTINGS = {
@@ -31,9 +35,19 @@ export const FOCUS_SETTINGS = {
   leftChairGraceSeconds: 1,
   /** How much each new frame moves the smoothed angle (0 to 1). */
   smoothing: 0.25,
+  /** After the meme appears, it cannot appear again until this many seconds have passed. */
+  memeGapSeconds: 3,
 };
 
-export const START_FOCUS: Focus = { redness: 0, missingSeconds: 0, faceHidden: false, bonked: false, distractions: 0 };
+export const START_FOCUS: Focus = {
+  redness: 0,
+  missingSeconds: 0,
+  faceHidden: false,
+  bonked: false,
+  distractions: 0,
+  memeVisible: false,
+  memeGap: 0,
+};
 
 export function averageAngle(angles: Angle[]): Angle {
   const n = angles.length || 1;
@@ -56,6 +70,18 @@ export function isOnAngle(angle: Angle, safe: Angle): boolean {
   );
 }
 
+function isAngle(value: unknown): value is Angle {
+  if (!value || typeof value !== "object") return false;
+  const angle = value as Angle;
+  return Number.isFinite(angle.yaw) && Number.isFinite(angle.pitch);
+}
+
+/** One saved angle. A list left by the short multi-spot experiment keeps its first angle. */
+export function angleFromStored(value: unknown): Angle | null {
+  if (Array.isArray(value)) return value.find(isAngle) ?? null;
+  return isAngle(value) ? value : null;
+}
+
 /** Moves the focus forward by one frame lasting `seconds`. */
 export function stepFocus(focus: Focus, reading: FocusReading, safe: Angle, seconds: number): Focus {
   const faceHidden = !reading.faceVisible && reading.bodyVisible;
@@ -71,18 +97,24 @@ export function stepFocus(focus: Focus, reading: FocusReading, safe: Angle, seco
 
   const redness = Math.min(1, Math.max(0, focus.redness + rate * seconds));
   const bonkNow = redness >= 1 && !focus.bonked;
+  const memeVisible = redness >= 1 && (focus.memeVisible || focus.memeGap <= 0);
+  let memeGap = memeVisible && !focus.memeVisible ? FOCUS_SETTINGS.memeGapSeconds : focus.memeGap;
+  memeGap = Math.max(0, memeGap - seconds);
+
   return {
     redness,
     missingSeconds,
     faceHidden,
     bonked: bonkNow || (focus.bonked && redness > 0),
     distractions: focus.distractions + (bonkNow ? 1 : 0),
+    memeVisible,
+    memeGap,
   };
 }
 
-/** The chosen meme shows while the border is fully red. */
+/** The chosen meme is on screen. A new pop waits out the gap even if the border is fully red again. */
 export function showMeme(focus: Focus): boolean {
-  return focus.redness >= 1;
+  return focus.memeVisible;
 }
 
 export function focusState(focus: Focus): FocusState {

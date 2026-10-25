@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { isCustomMeme, memeById, SAMPLE_MEMES, type Meme } from "./memes";
+import { isCustomMeme, memeById, reviveMeme, SAMPLE_MEMES, storedMeme, type Meme } from "./memes";
 import Calibration from "./screens/Calibration";
 import Home from "./screens/Home";
 import Pause from "./screens/Pause";
@@ -12,7 +12,7 @@ import { elapsedMs, endClock, pauseClock, resumeClock, sessionLengthMs, startClo
 import { addSession, deleteSetting, getSetting, setSetting, type PastSession } from "./storage/focusDb";
 import type { ProfileData } from "./screens/Profile";
 import type { Reading } from "./tracking/faceTracking";
-import { START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
+import { angleFromStored, START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
 import { useTracking } from "./tracking/useTracking";
 
 type Phase =
@@ -60,17 +60,25 @@ export default function App() {
 
   useEffect(() => {
     getSetting<string>("chosenMemeId").then((id) => id && setChosenMemeId(id));
-    getSetting<Meme[]>("customMemes").then((saved) => {
+    getSetting<unknown[]>("customMemes").then((saved) => {
       if (!Array.isArray(saved)) return;
-      setCustomMemes(saved.filter((meme) => meme && typeof meme.id === "string" && typeof meme.name === "string" && typeof meme.src === "string"));
+      setCustomMemes(saved.flatMap((meme) => {
+        const revived = reviveMeme(meme);
+        return revived ? [revived] : [];
+      }));
     });
-    getSetting<Angle>("calibration").then((a) => a && setSavedAngle(a));
+    getSetting<unknown>("calibration").then((saved) => {
+      const angle = angleFromStored(saved);
+      if (!angle) return;
+      setSavedAngle(angle);
+      safeRef.current = angle;
+    });
   }, []);
 
   /** Rejects when the browser refuses to store it, so the meme never shows without being saved. */
   const addMeme = async (meme: Meme) => {
     const next = [...customMemes, meme];
-    await setSetting("customMemes", next);
+    await setSetting("customMemes", next.map(storedMeme));
     setCustomMemes(next);
     chooseMeme(meme.id);
   };
@@ -78,7 +86,7 @@ export default function App() {
   const removeMeme = (id: string) => {
     setCustomMemes((prev) => {
       const next = prev.filter((meme) => meme.id !== id);
-      setSetting("customMemes", next);
+      setSetting("customMemes", next.map(storedMeme));
       return next;
     });
     if (chosenMemeId === id) chooseMeme(SAMPLE_MEMES[0].id);
@@ -142,6 +150,8 @@ export default function App() {
     if (phase === "running") {
       setSettingsOpen(false);
       setPhase("recalibrating-session");
+    } else {
+      safeRef.current = null;
     }
   };
 

@@ -11,7 +11,7 @@ export type PastSession = {
   distractions: number;
 };
 
-export type SettingKey = "chosenMemeId" | "calibration" | "profile" | "customMemes";
+export type SettingKey = "chosenMemeId" | "calibration" | "profile" | "customMemes" | "memeVolume" | "ambientVolume";
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 

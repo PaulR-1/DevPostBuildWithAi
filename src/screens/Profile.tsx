@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type TransitionEvent } f
 import type { Meme } from "../memes";
 import MemePreview from "./MemePreview";
 import { getSetting, setSetting } from "../storage/focusDb";
+import { playDrop } from "../uiSound";
 import { useDialog } from "./useDialog";
 import type { PresencePhase } from "./usePresence";
 
@@ -89,7 +90,15 @@ export default function Profile({
   const favourite = memes.find((meme) => meme.id === profile.favouriteMemeId) ?? null;
 
   return (
-    <div className="settings-backdrop" data-phase={phase} onTransitionEnd={onTransitionEnd} onClick={onClose}>
+    <div
+      className="settings-backdrop"
+      data-phase={phase}
+      onTransitionEnd={onTransitionEnd}
+      onClick={() => {
+        playDrop();
+        onClose();
+      }}
+    >
       <div className="settings" data-phase={phase} ref={dialogRef} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="profile-title">
         <h2 id="profile-title">Profile</h2>
 
@@ -105,7 +114,7 @@ export default function Profile({
               </span>
             </button>
             {profile.photo && (
-              <button className="profile-photo-delete" aria-label="Remove photo" onClick={() => setConfirmRemove(true)}>
+              <button className="profile-photo-delete" data-sound="drop" aria-label="Remove photo" onClick={() => setConfirmRemove(true)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M4.5 7h15" />
                   <path d="M9 7V5.2A1.2 1.2 0 0 1 10.2 4h3.6A1.2 1.2 0 0 1 15 5.2V7" />
@@ -119,10 +128,10 @@ export default function Profile({
             <div className="settings-confirm">
               <span>Remove this photo?</span>
               <div className="settings-confirm-actions">
-                <button className="text-button" onClick={() => setConfirmRemove(false)}>
+                <button className="text-button" data-sound="drop" onClick={() => setConfirmRemove(false)}>
                   Cancel
                 </button>
-                <button className="pill-button pill-button--danger" onClick={() => edit({}, ["photo"])}>
+                <button className="pill-button pill-button--danger" data-sound="drop" onClick={() => edit({}, ["photo"])}>
                   Remove
                 </button>
               </div>
@@ -159,7 +168,7 @@ export default function Profile({
               ))}
             </select>
             {favourite && (
-              <button className="pill-button" onClick={() => edit({}, ["favouriteMemeId"])}>
+              <button className="pill-button" data-sound="drop" onClick={() => edit({}, ["favouriteMemeId"])}>
                 Clear
               </button>
             )}
@@ -170,7 +179,7 @@ export default function Profile({
           <button className="pill-button pill-button--primary" onClick={save}>
             Save
           </button>
-          <button className="pill-button" onClick={onClose}>
+          <button className="pill-button" data-sound="drop" onClick={onClose}>
             Cancel
           </button>
         </div>

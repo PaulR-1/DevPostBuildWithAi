@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Reading } from "../tracking/faceTracking";
 import { averageAngle, type Angle } from "../tracking/focusState";
 import type { TrackingStatus } from "../tracking/useTracking";
+import { playCountdown } from "../uiSound";
 
 const COUNTDOWN_SECONDS = 3;
 const SAMPLING_SECONDS = 1.5;
@@ -31,6 +32,7 @@ export default function Calibration({
 
   useEffect(() => {
     if (step.name === "countdown") {
+      playCountdown(step.left);
       const timer = setTimeout(() => {
         if (step.left > 1) setStep({ name: "countdown", left: step.left - 1 });
         else {
@@ -76,7 +78,7 @@ export default function Calibration({
             </button>
           )}
           <div className="calibration-secondary">
-            <button className="calibration-quiet" onClick={onCancel}>
+            <button className="calibration-quiet" data-sound="drop" onClick={onCancel}>
               Back
             </button>
           </div>

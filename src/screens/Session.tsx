@@ -77,6 +77,7 @@ export default function Session({
       <div className="bubble">
         <button
           className="bubble-icon"
+          data-sound={!paused && menuOpen ? "drop" : undefined}
           onClick={() => {
             if (!paused) setMenuOpen((open) => !open);
           }}
@@ -108,7 +109,7 @@ export default function Session({
                 Pause
               </button>
             )}
-            <button onClick={onStop}>
+            <button data-sound="drop" onClick={onStop}>
               <MenuIcon>
                 <rect x="7" y="7" width="10" height="10" rx="1.5" />
               </MenuIcon>

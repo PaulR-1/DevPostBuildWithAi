@@ -15,6 +15,7 @@ import type { ProfileData } from "./screens/Profile";
 import type { Reading } from "./tracking/faceTracking";
 import { angleFromStored, borderHue, START_FOCUS, stepFocus, type Angle, type Focus } from "./tracking/focusState";
 import { useTracking } from "./tracking/useTracking";
+import { playClick, playDrop, setAmbientVolume, setMemeVolume } from "./uiSound";
 
 type Phase =
   | "home"
@@ -51,6 +52,8 @@ export default function App() {
   const [customMemes, setCustomMemes] = useState<Meme[]>([]);
   const memes = [...SAMPLE_MEMES, ...customMemes];
   const [savedAngle, setSavedAngle] = useState<Angle | null>(null);
+  const [memeVolume, setMemeVolumeState] = useState(1);
+  const [ambientVolume, setAmbientVolumeState] = useState(1);
 
   const trackingFocus = phase === "running" && !settingsOpen;
   const trackingFocusRef = useRef(trackingFocus);
@@ -74,6 +77,28 @@ export default function App() {
       setSavedAngle(angle);
       safeRef.current = angle;
     });
+    getSetting<number>("memeVolume").then((saved) => {
+      if (typeof saved !== "number") return;
+      setMemeVolume(saved);
+      setMemeVolumeState(saved);
+    });
+    getSetting<number>("ambientVolume").then((saved) => {
+      if (typeof saved !== "number") return;
+      setAmbientVolume(saved);
+      setAmbientVolumeState(saved);
+    });
+  }, []);
+
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      if (!(event.target instanceof Element)) return;
+      const button = event.target.closest("button");
+      if (!button) return;
+      if (button.dataset.sound === "drop") playDrop();
+      else playClick();
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
   }, []);
 
   /** Rejects when the browser refuses to store it, so the meme never shows without being saved. */
@@ -261,6 +286,18 @@ export default function App() {
         <Settings
           hasCalibration={savedAngle !== null}
           showRecalibrate={phase === "running" || phase === "paused"}
+          memeVolume={memeVolume}
+          ambientVolume={ambientVolume}
+          onMemeVolume={(value) => {
+            setMemeVolume(value);
+            setMemeVolumeState(value);
+            setSetting("memeVolume", value);
+          }}
+          onAmbientVolume={(value) => {
+            setAmbientVolume(value);
+            setAmbientVolumeState(value);
+            setSetting("ambientVolume", value);
+          }}
           onRecalibrate={recalibrate}
           onForgetCalibration={forgetCalibration}
           onSessionsCleared={() => setSessionsEpoch((n) => n + 1)}

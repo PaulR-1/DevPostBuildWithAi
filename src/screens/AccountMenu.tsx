@@ -48,6 +48,7 @@ export default function AccountMenu({ memes, onOpenSettings }: { memes: Meme[]; 
       <div className="account" ref={accountRef}>
         <button
           className="account-button"
+          data-sound={open ? "drop" : undefined}
           onClick={() => setOpen((value) => !value)}
           aria-label="Account menu"
           aria-haspopup="menu"

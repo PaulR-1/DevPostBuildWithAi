@@ -1,5 +1,6 @@
 import { useEffect, useState, type TransitionEvent } from "react";
 import { clearSessions } from "../storage/focusDb";
+import { playClick, playDrop } from "../uiSound";
 import { useDialog } from "./useDialog";
 import type { PresencePhase } from "./usePresence";
 
@@ -43,6 +44,10 @@ async function askCamera(): Promise<void> {
 export default function Settings({
   hasCalibration,
   showRecalibrate,
+  memeVolume,
+  ambientVolume,
+  onMemeVolume,
+  onAmbientVolume,
   onRecalibrate,
   onForgetCalibration,
   onSessionsCleared,
@@ -52,6 +57,10 @@ export default function Settings({
 }: {
   hasCalibration: boolean;
   showRecalibrate: boolean;
+  memeVolume: number;
+  ambientVolume: number;
+  onMemeVolume: (value: number) => void;
+  onAmbientVolume: (value: number) => void;
   onRecalibrate: () => void;
   onForgetCalibration: () => void;
   onSessionsCleared: () => void;
@@ -83,7 +92,15 @@ export default function Settings({
   };
 
   return (
-    <div className="settings-backdrop" data-phase={phase} onTransitionEnd={onTransitionEnd} onClick={onClose}>
+    <div
+      className="settings-backdrop"
+      data-phase={phase}
+      onTransitionEnd={onTransitionEnd}
+      onClick={() => {
+        playDrop();
+        onClose();
+      }}
+    >
       <div className="settings" data-phase={phase} ref={dialogRef} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <h2 id="settings-title">Settings</h2>
 
@@ -104,17 +121,17 @@ export default function Settings({
               </button>
             </div>
             {hasCalibration && confirm !== "angle" && (
-              <button className="text-button text-button--danger settings-link" onClick={() => setConfirm("angle")}>
+              <button className="text-button text-button--danger settings-link" data-sound="drop" onClick={() => setConfirm("angle")}>
                 Forget safe angle
               </button>
             )}
             {confirm === "angle" && (
               <div className="settings-confirm">
                 <span>Forget the safe angle?</span>
-                <button className="text-button" onClick={() => setConfirm(null)}>
+                <button className="text-button" data-sound="drop" onClick={() => setConfirm(null)}>
                   Cancel
                 </button>
-                <button className="pill-button pill-button--danger" onClick={forget}>
+                <button className="pill-button pill-button--danger" data-sound="drop" onClick={forget}>
                   Forget
                 </button>
               </div>
@@ -138,6 +155,46 @@ export default function Settings({
         </section>
 
         <section className="settings-group">
+          <h3>Sound</h3>
+          <div className="sound-control">
+            <div>
+              <strong>Meme volume</strong>
+              <p className="muted">How loud the bonk and your meme sounds are.</p>
+            </div>
+            <input
+              className="settings-volume"
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={memeVolume}
+              aria-label="Meme volume"
+              onChange={(event) => onMemeVolume(Number(event.target.value))}
+            />
+          </div>
+          <div className="sound-control">
+            <div>
+              <strong>Ambient volume</strong>
+              <p className="muted">Clicks, the 3-2-1 countdown, and the sounds when a session starts and ends.</p>
+            </div>
+            <input
+              className="settings-volume"
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={ambientVolume}
+              aria-label="Ambient volume"
+              onChange={(event) => onAmbientVolume(Number(event.target.value))}
+              onPointerUp={() => playClick()}
+              onKeyUp={(event) => {
+                if (event.key.startsWith("Arrow")) playClick();
+              }}
+            />
+          </div>
+        </section>
+
+        <section className="settings-group">
           <h3>History</h3>
           {confirm !== "sessions" ? (
             <div className="settings-row">
@@ -145,24 +202,24 @@ export default function Settings({
                 <strong>Past sessions</strong>
                 <p className="muted">Deletes every saved session from this browser.</p>
               </div>
-              <button className="pill-button pill-button--danger settings-clear" onClick={() => setConfirm("sessions")}>
+              <button className="pill-button pill-button--danger settings-clear" data-sound="drop" onClick={() => setConfirm("sessions")}>
                 Clear
               </button>
             </div>
           ) : (
             <div className="settings-confirm">
               <span>Delete every past session?</span>
-              <button className="text-button" onClick={() => setConfirm(null)} disabled={clearing}>
+              <button className="text-button" data-sound="drop" onClick={() => setConfirm(null)} disabled={clearing}>
                 Cancel
               </button>
-              <button className="pill-button pill-button--danger" onClick={clearHistory} disabled={clearing}>
+              <button className="pill-button pill-button--danger" data-sound="drop" onClick={clearHistory} disabled={clearing}>
                 {clearing ? "Deleting…" : "Delete"}
               </button>
             </div>
           )}
         </section>
 
-        <button className="pill-button" onClick={onClose}>
+        <button className="pill-button" data-sound="drop" onClick={onClose}>
           Close
         </button>
       </div>

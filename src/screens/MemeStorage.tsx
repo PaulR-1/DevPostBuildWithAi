@@ -11,6 +11,7 @@ import {
   type Meme,
 } from "../memes";
 import MemePreview from "./MemePreview";
+import { playDrop } from "../uiSound";
 import { useDialog } from "./useDialog";
 import { usePresence, type PresencePhase } from "./usePresence";
 
@@ -174,7 +175,7 @@ export default function MemeStorage({
               <span>{meme.name}</span>
             </button>
             {isCustomMeme(meme.id) && (
-              <button className="meme-remove" aria-label={`Remove ${meme.name}`} onClick={() => { setConfirmId(meme.id); closeDraft(); }}>
+              <button className="meme-remove" data-sound="drop" aria-label={`Remove ${meme.name}`} onClick={() => { setConfirmId(meme.id); closeDraft(); }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" aria-hidden="true">
                   <path d="M6 6l12 12M18 6L6 18" />
                 </svg>
@@ -228,7 +229,7 @@ export default function MemeStorage({
                 <button className="pill-button" onClick={() => videoInput.current?.click()}>
                   Video
                 </button>
-                <button className="pill-button" onClick={() => setStep("closed")}>
+                <button className="pill-button" data-sound="drop" onClick={() => setStep("closed")}>
                   Cancel
                 </button>
               </div>
@@ -266,7 +267,7 @@ export default function MemeStorage({
                     {saving ? "Saving…" : "Add"}
                   </button>
                 )}
-                <button className="pill-button" onClick={closeDraft}>
+                <button className="pill-button" data-sound="drop" onClick={closeDraft}>
                   Cancel
                 </button>
               </div>
@@ -279,10 +280,10 @@ export default function MemeStorage({
         <MemeSheetFrame phase={confirmSheet.phase} titleId="meme-remove-title" onClose={() => setConfirmId(null)} onTransitionEnd={confirmSheet.onTransitionEnd}>
           <h2 id="meme-remove-title">Remove {confirming.name}?</h2>
           <div className="meme-draft-actions">
-            <button className="pill-button pill-button--danger" onClick={() => { onRemove(confirming.id); setConfirmId(null); }}>
+            <button className="pill-button pill-button--danger" data-sound="drop" onClick={() => { onRemove(confirming.id); setConfirmId(null); }}>
               Remove
             </button>
-            <button className="pill-button" onClick={() => setConfirmId(null)}>
+            <button className="pill-button" data-sound="drop" onClick={() => setConfirmId(null)}>
               Cancel
             </button>
           </div>
@@ -307,7 +308,15 @@ function MemeSheetFrame({
 }) {
   const ref = useDialog(onClose);
   return (
-    <div className="meme-sheet-backdrop" data-phase={phase} onClick={onClose} onTransitionEnd={onTransitionEnd}>
+    <div
+      className="meme-sheet-backdrop"
+      data-phase={phase}
+      onClick={() => {
+        playDrop();
+        onClose();
+      }}
+      onTransitionEnd={onTransitionEnd}
+    >
       <div
         className="meme-sheet home-card"
         ref={ref}

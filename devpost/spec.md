@@ -75,7 +75,7 @@ PRD ref: `prd.md > The Core Journey`.
 
 ### Settings
 
-Opens from the account menu and from the session bubble. The safe angle, including recalibrate and forget, is only in Settings opened from the session bubble. Forget during a running session sends you to calibrate again; the live angle stays until that finishes, so the border does not freeze. Camera shows whether Chrome has allowed the camera, can ask Chrome to allow it, and shows the unblock message when it has not. History deletes every saved session after a confirm.
+Opens from the account menu and from the session bubble. The safe angle, including recalibrate and forget, is only in Settings opened from the session bubble. Forget during a running session sends you to calibrate again; the live angle stays until that finishes, so the border does not freeze. Camera shows whether Chrome has allowed the camera, can ask Chrome to allow it, and shows the unblock message when it has not. Sound saves a meme volume for the bonk and your meme sounds, and an ambient volume for clicks, the 3-2-1 countdown, and the sounds when a session starts and ends. History deletes every saved session after a confirm.
 
 PRD ref: `prd.md > Session controls`.
 

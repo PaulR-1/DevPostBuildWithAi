@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BONK_SRC, MEME_FADE_MS, playFile, playSting, SPLASH_SRC, type Playing } from "../memeSound";
+import { getMemeVolume } from "../uiSound";
 import type { Meme } from "../memes";
 
 const BUBBLES = Array.from({ length: 52 }, (_, i) => ({
@@ -46,7 +47,7 @@ export default function MemeBonk({ meme, leaving }: { meme: Meme; leaving: boole
     if (meme.ending === "splash") track(playFile(SPLASH_SRC));
 
     if (meme.kind === "video" && video) {
-      video.volume = 1;
+      video.volume = getMemeVolume();
       video.currentTime = 0;
       video.play().catch(() => {});
     } else if (meme.audioSrc) {

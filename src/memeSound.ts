@@ -1,3 +1,5 @@
+import { getMemeVolume } from "./uiSound";
+
 export const BONK_SRC = "/default-memes/bonk.mp3";
 export const SPLASH_SRC = "/default-memes/splash.mp3";
 export const MEME_FADE_MS = 400;
@@ -8,10 +10,10 @@ export type Playing = {
   done: Promise<void>;
 };
 
-/** Plays a file at full element volume. `fade` turns it down; `stop` cuts it. */
+/** Plays a file at the saved meme volume. `fade` turns it down from there; `stop` cuts it. */
 export function playFile(src: string): Playing {
   const audio = new Audio(src);
-  audio.volume = 1;
+  audio.volume = getMemeVolume();
   let settled = false;
   let resolveDone: () => void = () => {};
   const done = new Promise<void>((resolve) => {
@@ -48,7 +50,7 @@ export function playSting(): Playing {
   const ctx = new AudioContext();
   void ctx.resume();
   const master = ctx.createGain();
-  master.gain.value = 1;
+  master.gain.value = Math.max(getMemeVolume(), 0.0001);
   master.connect(ctx.destination);
   const now = ctx.currentTime;
   const notes = [392, 494, 587, 784];

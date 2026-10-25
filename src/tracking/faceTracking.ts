@@ -1,5 +1,6 @@
 import { FaceLandmarker, FilesetResolver, PoseLandmarker } from "@mediapipe/tasks-vision";
-import type { Classifications } from "@mediapipe/tasks-vision";
+import type { Classifications, NormalizedLandmark } from "@mediapipe/tasks-vision";
+import { handInFaceBox, holdLock, measureFace, shouldersNearLock, type FaceBox, type FaceSpot } from "./faceLock";
 
 const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm";
 const FACE_MODEL_URL =
@@ -10,6 +11,7 @@ const POSE_MODEL_URL =
 // Pose landmark numbers (from MediaPipe's pose map).
 const LEFT_SHOULDER = 11;
 const RIGHT_SHOULDER = 12;
+const HAND_POINTS = [15, 16, 19, 20];
 const MIN_SHOULDER_VISIBILITY = 0.5;
 const FRAME_INTERVAL_MS = 33;
 
@@ -34,12 +36,16 @@ const LEFT_EYE = { left: 362, right: 263, iris: 473 };
 
 export type Reading = {
   faceVisible: boolean;
-  /** Shoulders in view. Only checked when the face is missing; true whenever the face is visible. */
+  /** Shoulders in view. Only checked when the locked face is missing; true whenever that face is visible. */
   bodyVisible: boolean;
+  /** A wrist or index finger is inside the last face square. Only meaningful when the face mesh is missing. */
+  handOverFace: boolean;
   /** Left/right gaze in degrees: head turn plus eye movement. */
   yaw: number;
   /** Up/down gaze in degrees: head tilt plus eye movement. */
   pitch: number;
+  /** Square around the locked face, in unmirrored video coordinates. Null when that face is missing. */
+  faceBox: FaceBox | null;
 };
 
 export class CameraBlockedError extends Error {}
@@ -76,7 +82,7 @@ export function loadTrackers(): Promise<Trackers> {
         FaceLandmarker.createFromOptions(fileset, {
           baseOptions: { modelAssetPath: FACE_MODEL_URL, delegate: "GPU" },
           runningMode: "VIDEO",
-          numFaces: 1,
+          numFaces: 2,
           minFaceDetectionConfidence: MIN_CONFIDENCE,
           minFacePresenceConfidence: MIN_CONFIDENCE,
           minTrackingConfidence: MIN_CONFIDENCE,
@@ -85,7 +91,7 @@ export function loadTrackers(): Promise<Trackers> {
         PoseLandmarker.createFromOptions(fileset, {
           baseOptions: { modelAssetPath: POSE_MODEL_URL, delegate: "GPU" },
           runningMode: "VIDEO",
-          numPoses: 1,
+          numPoses: 2,
         }),
       ]);
       return { face, pose };
@@ -97,10 +103,34 @@ export function loadTrackers(): Promise<Trackers> {
   return trackersPromise;
 }
 
-function bodyVisible(pose: PoseLandmarker, video: HTMLVideoElement): boolean {
-  const body = pose.detectForVideo(video, performance.now()).landmarks?.[0];
-  if (!body) return false;
-  return [LEFT_SHOULDER, RIGHT_SHOULDER].some((i) => (body[i]?.visibility ?? 0) >= MIN_SHOULDER_VISIBILITY);
+function poseNearLock(
+  pose: PoseLandmarker,
+  video: HTMLVideoElement,
+  lock: FaceSpot | null,
+  lastBox: FaceBox | null,
+): { bodyVisible: boolean; handOverFace: boolean } {
+  if (!lock) return { bodyVisible: false, handOverFace: false };
+  const aspect = video.videoHeight / video.videoWidth || 1;
+  const poses = pose.detectForVideo(video, performance.now()).landmarks ?? [];
+  let bodyVisible = false;
+  let handOverFace = false;
+  for (const body of poses) {
+    const left = body[LEFT_SHOULDER];
+    const right = body[RIGHT_SHOULDER];
+    if (!left || !right) continue;
+    if (![left, right].some((point) => (point.visibility ?? 0) >= MIN_SHOULDER_VISIBILITY)) continue;
+    const mid = { x: (left.x + right.x) / 2, y: ((left.y + right.y) / 2) * aspect };
+    if (!shouldersNearLock(mid, lock)) continue;
+    bodyVisible = true;
+    if (!lastBox) continue;
+    const covering = HAND_POINTS.some((index) => {
+      const point = body[index];
+      if (!point || (point.visibility ?? 0) < MIN_SHOULDER_VISIBILITY) return false;
+      return handInFaceBox(point, lastBox, aspect);
+    });
+    if (covering) handOverFace = true;
+  }
+  return { bodyVisible, handOverFace };
 }
 
 function score(shapes: Classifications, name: string): number {
@@ -118,6 +148,20 @@ export function trackFrames(
 ): () => void {
   let timerId = 0;
   let lastTime = -1;
+  let lock: FaceSpot | null = null;
+  let lastBox: FaceBox | null = null;
+
+  const missing = (): Reading => {
+    const pose = poseNearLock(trackers.pose, video, lock, lastBox);
+    return {
+      faceVisible: false,
+      bodyVisible: pose.bodyVisible,
+      handOverFace: pose.handOverFace,
+      yaw: 0,
+      pitch: 0,
+      faceBox: null,
+    };
+  };
 
   // A timer, not animation frames: Chrome nearly stops animation frames when the
   // window is covered or the tab is hidden, and tracking must keep running then.
@@ -127,12 +171,29 @@ export function trackFrames(
     lastTime = video.currentTime;
 
     const result = trackers.face.detectForVideo(video, performance.now());
-    const points = result.faceLandmarks?.[0];
-    const shapes = result.faceBlendshapes?.[0];
-    if (!points || points.length < 478 || !shapes) {
-      onReading({ faceVisible: false, bodyVisible: bodyVisible(trackers.pose, video), yaw: 0, pitch: 0 });
+    const aspect = video.videoHeight / video.videoWidth || 1;
+    const landmarks = result.faceLandmarks ?? [];
+    const blendshapes = result.faceBlendshapes ?? [];
+    const seen: { spot: FaceSpot; box: FaceBox; points: NormalizedLandmark[]; shapes: Classifications }[] = [];
+    for (let i = 0; i < landmarks.length; i++) {
+      const points = landmarks[i];
+      const shapes = blendshapes[i];
+      if (!points || points.length < 478 || !shapes) continue;
+      const face = measureFace(points, aspect);
+      if (!face) continue;
+      seen.push({ ...face, points, shapes });
+    }
+
+    const held = holdLock(lock, seen.map((face) => face.spot));
+    lock = held.lock;
+    const chosen = seen.find((face) => face.spot === held.chosen);
+    if (chosen) lastBox = chosen.box;
+    if (!chosen) {
+      onReading(missing());
       return;
     }
+    const points = chosen.points;
+    const shapes = chosen.shapes;
 
     // Left/right is measured in the camera image, so head and eyes share one direction:
     // turning the head one way while the eyes look back the other way cancels out.
@@ -160,8 +221,10 @@ export function trackFrames(
     onReading({
       faceVisible: true,
       bodyVisible: true,
+      handOverFace: false,
       yaw: headYaw * HEAD_WEIGHT + eyeYaw,
       pitch: headPitch * HEAD_WEIGHT + eyeUp * EYE_PITCH_RANGE,
+      faceBox: chosen.box,
     });
   };
 

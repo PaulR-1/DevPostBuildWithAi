@@ -1,6 +1,11 @@
 export type Angle = { yaw: number; pitch: number };
 
-export type FocusReading = Angle & { faceVisible: boolean; bodyVisible: boolean };
+export type FocusReading = Angle & {
+  faceVisible: boolean;
+  bodyVisible: boolean;
+  /** Wrist or index finger inside the last face square. Only used when the face mesh is missing. */
+  handOverFace: boolean;
+};
 
 export type FocusState = "on-work" | "drifting" | "left-work" | "face-hidden" | "left-chair";
 
@@ -9,7 +14,7 @@ export type Focus = {
   redness: number;
   /** How long the face and body have both been missing without a break. */
   missingSeconds: number;
-  /** Face missing but body still in the chair. */
+  /** Face covered by a hand while the shoulders stay. The border holds. */
   faceHidden: boolean;
   /** The meme already bonked for this look-away; cleared once the border is fully green again. */
   bonked: boolean;
@@ -84,15 +89,16 @@ export function angleFromStored(value: unknown): Angle | null {
 
 /** Moves the focus forward by one frame lasting `seconds`. */
 export function stepFocus(focus: Focus, reading: FocusReading, safe: Angle, seconds: number): Focus {
-  const faceHidden = !reading.faceVisible && reading.bodyVisible;
+  const handOverFace = !reading.faceVisible && reading.bodyVisible && reading.handOverFace;
+  const lookingDown = !reading.faceVisible && reading.bodyVisible && !reading.handOverFace;
   const gone = !reading.faceVisible && !reading.bodyVisible;
   const missingSeconds = gone ? focus.missingSeconds + seconds : 0;
 
   let rate: number;
-  if (faceHidden) rate = 0;
+  if (handOverFace) rate = 0;
   else if (gone) {
     rate = missingSeconds < FOCUS_SETTINGS.leftChairGraceSeconds ? 0 : 1 / FOCUS_SETTINGS.secondsToRedLeftChair;
-  } else if (!isOnAngle(reading, safe)) rate = 1 / FOCUS_SETTINGS.secondsToRedLookingAway;
+  } else if (lookingDown || !isOnAngle(reading, safe)) rate = 1 / FOCUS_SETTINGS.secondsToRedLookingAway;
   else rate = -1 / FOCUS_SETTINGS.secondsToGreen;
 
   const redness = Math.min(1, Math.max(0, focus.redness + rate * seconds));
@@ -104,7 +110,7 @@ export function stepFocus(focus: Focus, reading: FocusReading, safe: Angle, seco
   return {
     redness,
     missingSeconds,
-    faceHidden,
+    faceHidden: handOverFace,
     bonked: bonkNow || (focus.bonked && redness > 0),
     distractions: focus.distractions + (bonkNow ? 1 : 0),
     memeVisible,

@@ -42,6 +42,7 @@ async function askCamera(): Promise<void> {
 
 export default function Settings({
   hasCalibration,
+  showRecalibrate,
   onRecalibrate,
   onForgetCalibration,
   onSessionsCleared,
@@ -50,6 +51,7 @@ export default function Settings({
   onTransitionEnd,
 }: {
   hasCalibration: boolean;
+  showRecalibrate: boolean;
   onRecalibrate: () => void;
   onForgetCalibration: () => void;
   onSessionsCleared: () => void;
@@ -85,38 +87,40 @@ export default function Settings({
       <div className="settings" data-phase={phase} ref={dialogRef} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <h2 id="settings-title">Settings</h2>
 
-        <section className="settings-group">
-          <h3>Focus</h3>
-          <div className="settings-row">
-            <div>
-              <strong>Safe angle</strong>
-              <p className="muted">
-                {hasCalibration
-                  ? "A safe angle is saved. Recalibrate if you moved your laptop, phone, or notebook."
-                  : "Nothing saved yet. Calibrate when you start a session, or do it now."}
-              </p>
-            </div>
-            <button className="pill-button pill-button--primary" onClick={onRecalibrate}>
-              {hasCalibration ? "Recalibrate" : "Calibrate"}
-            </button>
-          </div>
-          {hasCalibration && confirm !== "angle" && (
-            <button className="text-button text-button--danger settings-link" onClick={() => setConfirm("angle")}>
-              Forget saved angle
-            </button>
-          )}
-          {confirm === "angle" && (
-            <div className="settings-confirm">
-              <span>Forget the saved angle?</span>
-              <button className="text-button" onClick={() => setConfirm(null)}>
-                Cancel
-              </button>
-              <button className="pill-button pill-button--danger" onClick={forget}>
-                Forget
+        {showRecalibrate && (
+          <section className="settings-group">
+            <h3>Focus</h3>
+            <div className="settings-row">
+              <div>
+                <strong>Safe angle</strong>
+                <p className="muted">
+                  {hasCalibration
+                    ? "Recalibrate if you moved your laptop, phone, or notebook."
+                    : "Set when you start a session."}
+                </p>
+              </div>
+              <button className="pill-button pill-button--primary" onClick={onRecalibrate}>
+                {hasCalibration ? "Recalibrate" : "Calibrate"}
               </button>
             </div>
-          )}
-        </section>
+            {hasCalibration && confirm !== "angle" && (
+              <button className="text-button text-button--danger settings-link" onClick={() => setConfirm("angle")}>
+                Forget safe angle
+              </button>
+            )}
+            {confirm === "angle" && (
+              <div className="settings-confirm">
+                <span>Forget the safe angle?</span>
+                <button className="text-button" onClick={() => setConfirm(null)}>
+                  Cancel
+                </button>
+                <button className="pill-button pill-button--danger" onClick={forget}>
+                  Forget
+                </button>
+              </div>
+            )}
+          </section>
+        )}
 
         <section className="settings-group">
           <h3>Camera</h3>
@@ -141,7 +145,7 @@ export default function Settings({
                 <strong>Past sessions</strong>
                 <p className="muted">Deletes every saved session from this browser.</p>
               </div>
-              <button className="text-button text-button--danger" onClick={() => setConfirm("sessions")}>
+              <button className="pill-button pill-button--danger settings-clear" onClick={() => setConfirm("sessions")}>
                 Clear
               </button>
             </div>

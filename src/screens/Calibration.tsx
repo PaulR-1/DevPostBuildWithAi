@@ -42,8 +42,7 @@ export default function Calibration({
 
   useEffect(() => {
     if (step.name === "countdown") {
-      // The 3 is played from the button click. 2 and 1 play as the timer steps.
-      if (step.left < COUNTDOWN_SECONDS) playCountdown(step.left);
+      playCountdown(step.left);
       const timer = setTimeout(() => {
         if (step.left > 1) setStep({ name: "countdown", left: step.left - 1 });
         else {
@@ -73,7 +72,6 @@ export default function Calibration({
   }, [step]);
 
   const startCountdown = (index: number) => {
-    playCountdown(COUNTDOWN_SECONDS);
     setScreen("capture");
     setStep({ name: "countdown", left: COUNTDOWN_SECONDS });
     onCapturingRef.current?.(index);

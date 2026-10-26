@@ -42,7 +42,8 @@ export default function Calibration({
 
   useEffect(() => {
     if (step.name === "countdown") {
-      playCountdown(step.left);
+      // The 3 is played from the button click. 2 and 1 play as the timer steps.
+      if (step.left < COUNTDOWN_SECONDS) playCountdown(step.left);
       const timer = setTimeout(() => {
         if (step.left > 1) setStep({ name: "countdown", left: step.left - 1 });
         else {
@@ -71,19 +72,22 @@ export default function Calibration({
     }
   }, [step]);
 
+  const startCountdown = (index: number) => {
+    playCountdown(COUNTDOWN_SECONDS);
+    setScreen("capture");
+    setStep({ name: "countdown", left: COUNTDOWN_SECONDS });
+    onCapturingRef.current?.(index);
+  };
+
   const begin = (several: boolean) => {
     multiRef.current = several;
     keptRef.current = [];
     setKept([]);
-    setScreen("capture");
-    setStep({ name: "countdown", left: COUNTDOWN_SECONDS });
-    onCapturingRef.current?.(0);
+    startCountdown(0);
   };
 
   const addAnother = () => {
-    setScreen("capture");
-    setStep({ name: "countdown", left: COUNTDOWN_SECONDS });
-    onCapturingRef.current?.(keptRef.current.length);
+    startCountdown(keptRef.current.length);
   };
 
   const faceMissing = status === "ready" && reading !== null && !reading.faceVisible && screen !== "another";
@@ -124,7 +128,7 @@ export default function Calibration({
             </>
           )}
           {showCapture && (
-            <button className="calibration-primary" onClick={() => setStep({ name: "countdown", left: COUNTDOWN_SECONDS })}>
+            <button className="calibration-primary" onClick={() => startCountdown(keptRef.current.length)}>
               {step.name === "failed" ? "Try again" : "Calibrate"}
             </button>
           )}

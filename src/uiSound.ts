@@ -27,46 +27,54 @@ export function setAmbientVolume(value: number) {
 
 function context(): AudioContext {
   audio ??= new AudioContext();
-  void audio.resume();
   return audio;
+}
+
+/** Browsers drop tones that were scheduled while the context was still suspended. */
+function ready(): Promise<AudioContext> {
+  const ctx = context();
+  if (ctx.state === "running") return Promise.resolve(ctx);
+  return ctx.resume().then(() => ctx);
 }
 
 function blip(freq: number, duration: number, peak: number, type: OscillatorType) {
   if (ambientVolume <= 0) return;
-  const ctx = context();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = type;
-  osc.frequency.value = freq;
-  const now = ctx.currentTime;
-  const level = Math.max(0.0002, peak * ambientVolume);
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(level, now + 0.012);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(now);
-  osc.stop(now + duration + 0.02);
+  void ready().then((ctx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    const now = ctx.currentTime;
+    const level = Math.max(0.0002, peak * ambientVolume);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(level, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration + 0.02);
+  });
 }
 
 function phrase(notes: number[]) {
   if (ambientVolume <= 0) return;
-  const ctx = context();
-  const now = ctx.currentTime;
-  notes.forEach((freq, i) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "triangle";
-    osc.frequency.value = freq;
-    const start = now + i * 0.12;
-    const level = Math.max(0.0002, 0.18 * ambientVolume);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(level, start + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(start);
-    osc.stop(start + 0.2);
+  void ready().then((ctx) => {
+    const now = ctx.currentTime;
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      const start = now + i * 0.12;
+      const level = Math.max(0.0002, 0.18 * ambientVolume);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(level, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.2);
+    });
   });
 }
 
@@ -78,7 +86,10 @@ export function playClick() {
 /** A water drop for closing, deleting, and cancelling. */
 export function playDrop() {
   if (ambientVolume <= 0) return;
-  const ctx = context();
+  void ready().then((ctx) => playDropAt(ctx));
+}
+
+function playDropAt(ctx: AudioContext) {
   const now = ctx.currentTime;
   const level = Math.max(0.0002, 0.22 * ambientVolume);
 
